@@ -7,6 +7,7 @@ using System.Text;
 namespace MicroJson
 {
 #pragma warning disable 1591
+
     public class ParserException : Exception
     {
         public int Line { get; private set; }
@@ -42,6 +43,7 @@ namespace MicroJson
                 Writer.WriteLine(message);
         }
     }
+
 #pragma warning restore 1591
 
     /// <summary>
@@ -49,11 +51,11 @@ namespace MicroJson
     /// </summary>
     public class JsonParser
     {
-        string Input { get; set; }
-        int InputLength { get; set; }
-        int Pos { get; set; }
-        int Line { get; set; }
-        int Col { get; set; }
+        private string Input { get; set; }
+        private int InputLength { get; set; }
+        private int Pos { get; set; }
+        private int Line { get; set; }
+        private int Col { get; set; }
 
         /// <summary>
         /// Gets or sets the logger.
@@ -374,7 +376,7 @@ namespace MicroJson
                 }
                 else if ((int)c < 0x20)
                 {
-                    throw BuildParserException("control character in string");
+                    //throw BuildParserException("control character in string");
                 }
                 else
                 {

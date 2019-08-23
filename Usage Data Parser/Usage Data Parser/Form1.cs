@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using MicroJson;
+using System.Diagnostics;
 
 namespace Usage_Data_Parser
 {
@@ -46,6 +47,106 @@ namespace Usage_Data_Parser
             }
         }
 
+        public ParsedJSONFile parseDodgyFile(string data)
+        {
+            ParsedJSONFile parsedFile = new ParsedJSONFile();
+            int n = 0;
+            int i = 0;
+            int charCount = data.Length;
+
+            bool key = false;
+            bool newValueExpected = false;
+            bool value = false;
+            bool classValue = false;
+            string keyValue = "";
+            string valueValue = "";
+
+            foreach (char c in data)
+            {
+                n++;
+
+                if (i > 0)
+                {
+                    i--;
+                    continue;
+                }
+
+                if (n == 1)
+                {
+                    if (c != '{')
+                    {
+                        Debug.WriteLine("First char not {");
+                        continue;
+                    }
+                }
+
+                if (c == ':')
+                {
+                    continue;
+                }
+
+                if (c == '{')
+                {
+                    if (!key && !value && newValueExpected)
+                    {
+                        classValue = true;
+                        char d = data.ElementAt(n);
+                        while (d != '}')
+                        {
+                        }
+                    }
+                }
+
+                if (c == '"')
+                {
+                    if (!key && !value && !newValueExpected) //new key value
+                    {
+                        keyValue = "";
+                        key = true;
+                        continue;
+                    }
+                    if (key && !value && !newValueExpected) //key completed
+                    {
+                        key = false;
+                        newValueExpected = true;
+                        //KEY COMPLETE - do something with it.
+                        continue;
+                    }
+                    if (!key && !value && newValueExpected)
+                    {
+                        valueValue = "";
+                        value = true;
+                        newValueExpected = false;
+                        continue;
+                    }
+                    if (!key && value && !newValueExpected)
+                    {
+                        //end of value.
+                        value = false;
+                        //VALUE Complete - do something with it.
+                        continue;
+                    }
+                }
+
+                if (key && !value) //new key value, but not in value yet.
+                {
+                    keyValue.Append(c);
+                    continue;
+                }
+                if (!key && value)
+                {
+                    valueValue.Append(c);
+                    continue;
+                }
+            }
+        }
+
+        public class keyValuePair
+        {
+            private string key;
+            private string value;
+        }
+
         public class ParsedJSONFile
         {
             private int sessionN;
@@ -63,7 +164,7 @@ namespace Usage_Data_Parser
             private string serialNum;
             private string fwVer;
             private string chirality;
-            private int nMotors;
+            private string nMotors;
         }
 
         public class Time
@@ -79,14 +180,14 @@ namespace Usage_Data_Parser
 
         public class Group
         {
-            private int n;
-            private int size;
+            private string n;
+            private string size;
             private GripChild[] grip;
         }
 
         public class GripChild
         {
-            private int n;
+            private string n;
             private string name;
             private string gripStr;
             private string duration;
@@ -111,8 +212,8 @@ namespace Usage_Data_Parser
 
         public class BattSample
         {
-            private int n;
-            private float battV;
+            private string n;
+            private string battV;
             private string duration;
         }
 
@@ -135,8 +236,8 @@ namespace Usage_Data_Parser
 
         public class TempSample
         {
-            private int n;
-            private float tempC;
+            private string n;
+            private string tempC;
             private string duration;
         }
 
@@ -149,13 +250,13 @@ namespace Usage_Data_Parser
 
         public class MagFluxX
         {
-            private float max;
+            private string max;
             private string duration;
         }
 
         public class MagFluxY
         {
-            private float max;
+            private string max;
             private string duration;
         }
     }
