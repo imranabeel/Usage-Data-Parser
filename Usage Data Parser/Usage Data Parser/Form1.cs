@@ -39,8 +39,8 @@ namespace Usage_Data_Parser
                     foreach (string file in files)
                     {
                         jsonInputData = File.ReadAllText(file);
-                        ParsedJSONFile jsonParsedData = new JsonSerializer().Deserialize<ParsedJSONFile>(jsonInputData);
-
+                        //ParsedJSONFile jsonParsedData = new JsonSerializer().Deserialize<ParsedJSONFile>(jsonInputData);
+                        ParsedJSONFile jsonParsedData = parseDodgyFile(jsonInputData);
                         string sessionN = jsonParsedData.ToString();
                     }
                 }
@@ -58,7 +58,7 @@ namespace Usage_Data_Parser
             bool newValueExpected = false;
             bool value = false;
             bool classValue = false;
-            string keyValue = "";
+            var keyValue = new StringBuilder();
             string valueValue = "";
 
             foreach (char c in data)
@@ -85,60 +85,118 @@ namespace Usage_Data_Parser
                     continue;
                 }
 
-                if (c == '{')
-                {
-                    if (!key && !value && newValueExpected)
-                    {
-                        classValue = true;
-                        char d = data.ElementAt(n);
-                        while (d != '}')
-                        {
-                        }
-                    }
-                }
-
                 if (c == '"')
                 {
-                    if (!key && !value && !newValueExpected) //new key value
+                    if (!key) //new key value
                     {
-                        keyValue = "";
+                        keyValue = new StringBuilder();
                         key = true;
                         continue;
                     }
-                    if (key && !value && !newValueExpected) //key completed
+                    if (key) //key completed
                     {
+                        var builtString = keyValue.ToString();
                         key = false;
                         newValueExpected = true;
                         //KEY COMPLETE - do something with it.
-                        continue;
-                    }
-                    if (!key && !value && newValueExpected)
-                    {
-                        valueValue = "";
-                        value = true;
-                        newValueExpected = false;
-                        continue;
-                    }
-                    if (!key && value && !newValueExpected)
-                    {
-                        //end of value.
-                        value = false;
-                        //VALUE Complete - do something with it.
+
+                        Debug.WriteLine(builtString);
+                        switch (builtString)
+                        {
+                            case "$schema":
+                                {
+                                    KeyValue keyValue1 = getValue(n, data);
+                                    Debug.WriteLine(keyValue1.value);
+                                    i = keyValue1.charToSkip;
+                                }
+                                break;
+
+                            case "sessionN":
+                                {
+                                    KeyValue keyValue2 = getValue(n, data);
+                                    Debug.WriteLine(keyValue2.value);
+                                    i = keyValue2.charToSkip;
+                                }
+                                break;
+
+                            case "handConfig":
+                                break;
+
+                            case "resetCause":
+                                break;
+
+                            case "time":
+                                break;
+
+                            case "grip":
+                                break;
+
+                            case "battery":
+                                break;
+
+                            case "temp":
+                                break;
+
+                            case "magFlux":
+                                break;
+
+                            default: break;
+                        }
                         continue;
                     }
                 }
 
-                if (key && !value) //new key value, but not in value yet.
+                if (key) //new key value, but not in value yet.
                 {
                     keyValue.Append(c);
                     continue;
                 }
-                if (!key && value)
+            }
+            return parsedFile;
+        }
+
+        public KeyValue getValue(int startingPos, string data)
+        {
+            KeyValue keyValue = new KeyValue();
+            keyValue.value = "";
+
+            bool valueStarted = false;
+
+            var tempString = new StringBuilder();
+
+            for (int i = startingPos; i < data.Length; i++)
+            {
+                char c = data.ElementAt(i);
+                keyValue.charToSkip++;
+
+                if (((c == ':') || c == (' ')) && (!valueStarted))
                 {
-                    valueValue.Append(c);
                     continue;
                 }
+
+                if ((c == '"') && (!valueStarted))
+                {
+                    valueStarted = true;
+                    continue;
+                }
+
+                if ((c == '"') && (data.ElementAt(i + 1) == ',') && (valueStarted))
+                {
+                    keyValue.charToSkip++; //skip comma as well.
+                    keyValue.value = tempString.ToString();
+                    break;
+                }
+
+                tempString.Append(c);
             }
+
+            return keyValue;
+        }
+
+        public class KeyValue
+        {
+            public int charToSkip { get; set; }
+            public string value { get; set; }
         }
 
         public class keyValuePair
