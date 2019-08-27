@@ -198,7 +198,7 @@ namespace Usage_Data_Parser
 
             var tempString = new StringBuilder();
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 keyValue.charToSkip++;
@@ -348,7 +348,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -383,11 +383,12 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            //keyValueArray.arrayName = keyValue.ToString();
                             key = false;
 
                             localDepth++;
                             var arrayReturn = get2ndKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
                         }
@@ -432,7 +433,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -467,13 +468,15 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            //keyValueArray.arrayName = keyValue.ToString();
                             key = false;
                             skip += 3;//skip all chars up to "{"
 
                             localDepth++;
                             var arrayReturn = get3rdKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
+
                             skip += arrayReturn.Item2;
                         }
                         else
@@ -517,7 +520,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -552,12 +555,13 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            //keyValueArray.arrayName = keyValue.ToString();
                             key = false;
                             skip += 3;//skip all chars up to "{"
 
                             localDepth++;
                             var arrayReturn = get4thKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
                         }
@@ -602,7 +606,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -637,12 +641,13 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            // keyValueArray.arrayName = keyValue.ToString();
                             key = false;
                             skip += 3;//skip all chars up to "{"
 
                             localDepth++;
                             var arrayReturn = get5thKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
                         }
@@ -687,7 +692,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -722,12 +727,13 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            // keyValueArray.arrayName = keyValue.ToString();
                             key = false;
                             skip += 3;//skip all chars up to "{"
 
                             localDepth++;
                             var arrayReturn = get6thKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
                         }
@@ -772,7 +778,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -807,12 +813,13 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            //keyValueArray.arrayName = keyValue.ToString();
                             key = false;
                             skip += 3;//skip all chars up to "{"
 
                             localDepth++;
                             var arrayReturn = get7thKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
                         }
@@ -857,7 +864,7 @@ namespace Usage_Data_Parser
 
             int numPairs = 0;
 
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
+            for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
                 skipReturn++;
@@ -892,12 +899,13 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            keyValueArray.arrayName = keyValue.ToString();
+                            //keyValueArray.arrayName = keyValue.ToString();
                             key = false;
                             skip += 3;//skip all chars up to "{"
 
                             localDepth++;
                             var arrayReturn = getKeyValueArray(i + 1, data, localDepth);
+                            arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
                         }
