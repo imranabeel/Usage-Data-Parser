@@ -376,7 +376,7 @@ namespace MicroJson
                 }
                 else if ((int)c < 0x20)
                 {
-                    //throw BuildParserException("control character in string");
+                    throw BuildParserException("control character in string");
                 }
                 else
                 {

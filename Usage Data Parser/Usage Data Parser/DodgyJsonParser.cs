@@ -74,6 +74,12 @@ namespace Usage_Data_Parser
                         }
                         break;
 
+                    case "accel":
+                        {
+                            parsedFile = splitAccel(keyValueArray, parsedFile);
+                        }
+                        break;
+
                     default: break;
                 }
             }
@@ -242,33 +248,32 @@ namespace Usage_Data_Parser
                 {
                     case "min":
                         {
-                            currentFile.battery.min = new MinBattery();
                             foreach (KeyValueArray array2 in array1.array)
                             {
                                 switch (array2.arrayName)
                                 {
                                     case "battSample":
                                         {
-                                            currentFile.battery.min.battSample = new BattSample();
+                                            currentFile.battery.min = new BattSample();
                                             foreach (KeyValuePair pairs in array2.pairs)
                                             {
                                                 switch (pairs.key)
                                                 {
                                                     case "n":
                                                         {
-                                                            currentFile.battery.min.battSample.n = pairs.value;
+                                                            currentFile.battery.min.n = pairs.value;
                                                         }
                                                         break;
 
                                                     case "battV":
                                                         {
-                                                            currentFile.battery.min.battSample.battV = pairs.value;
+                                                            currentFile.battery.min.battV = pairs.value;
                                                         }
                                                         break;
 
                                                     case "duration":
                                                         {
-                                                            currentFile.battery.min.battSample.duration = pairs.value;
+                                                            currentFile.battery.min.duration = pairs.value;
                                                         }
                                                         break;
 
@@ -286,33 +291,32 @@ namespace Usage_Data_Parser
 
                     case "max":
                         {
-                            currentFile.battery.max = new MaxBattery();
                             foreach (KeyValueArray array2 in array1.array)
                             {
                                 switch (array2.arrayName)
                                 {
                                     case "battSample":
                                         {
-                                            currentFile.battery.max.battSample = new BattSample();
+                                            currentFile.battery.max = new BattSample();
                                             foreach (KeyValuePair pairs in array2.pairs)
                                             {
                                                 switch (pairs.key)
                                                 {
                                                     case "n":
                                                         {
-                                                            currentFile.battery.max.battSample.n = pairs.value;
+                                                            currentFile.battery.max.n = pairs.value;
                                                         }
                                                         break;
 
                                                     case "battV":
                                                         {
-                                                            currentFile.battery.max.battSample.battV = pairs.value;
+                                                            currentFile.battery.max.battV = pairs.value;
                                                         }
                                                         break;
 
                                                     case "duration":
                                                         {
-                                                            currentFile.battery.max.battSample.duration = pairs.value;
+                                                            currentFile.battery.max.duration = pairs.value;
                                                         }
                                                         break;
 
@@ -377,33 +381,32 @@ namespace Usage_Data_Parser
                 {
                     case "min":
                         {
-                            currentFile.temp.minTemp = new MinTemp();
                             foreach (KeyValueArray array2 in array1.array)
                             {
                                 switch (array2.arrayName)
                                 {
                                     case "tempSample":
                                         {
-                                            currentFile.temp.minTemp.tempSample = new TempSample();
+                                            currentFile.temp.minTemp = new TempSample();
                                             foreach (KeyValuePair pairs in array2.pairs)
                                             {
                                                 switch (pairs.key)
                                                 {
                                                     case "n":
                                                         {
-                                                            currentFile.temp.minTemp.tempSample.n = pairs.value;
+                                                            currentFile.temp.minTemp.n = pairs.value;
                                                         }
                                                         break;
 
                                                     case "tempC":
                                                         {
-                                                            currentFile.temp.minTemp.tempSample.tempC = pairs.value;
+                                                            currentFile.temp.minTemp.tempC = pairs.value;
                                                         }
                                                         break;
 
                                                     case "duration":
                                                         {
-                                                            currentFile.temp.minTemp.tempSample.duration = pairs.value;
+                                                            currentFile.temp.minTemp.duration = pairs.value;
                                                         }
                                                         break;
 
@@ -421,33 +424,32 @@ namespace Usage_Data_Parser
 
                     case "max":
                         {
-                            currentFile.temp.maxTemp = new MaxTemp();
                             foreach (KeyValueArray array2 in array1.array)
                             {
                                 switch (array2.arrayName)
                                 {
                                     case "tempSample":
                                         {
-                                            currentFile.temp.maxTemp.tempSample = new TempSample();
+                                            currentFile.temp.maxTemp = new TempSample();
                                             foreach (KeyValuePair pairs in array2.pairs)
                                             {
                                                 switch (pairs.key)
                                                 {
                                                     case "n":
                                                         {
-                                                            currentFile.temp.maxTemp.tempSample.n = pairs.value;
+                                                            currentFile.temp.maxTemp.n = pairs.value;
                                                         }
                                                         break;
 
                                                     case "tempC":
                                                         {
-                                                            currentFile.temp.maxTemp.tempSample.tempC = pairs.value;
+                                                            currentFile.temp.maxTemp.tempC = pairs.value;
                                                         }
                                                         break;
 
                                                     case "duration":
                                                         {
-                                                            currentFile.temp.maxTemp.tempSample.duration = pairs.value;
+                                                            currentFile.temp.maxTemp.duration = pairs.value;
                                                         }
                                                         break;
 
@@ -526,7 +528,7 @@ namespace Usage_Data_Parser
                 {
                     case "X":
                         {
-                            currentFile.magFlux.X = new MagFluxX();
+                            currentFile.magFlux.X = new MagFluxMeas();
                             foreach (KeyValuePair pair in array1.pairs)
                             {
                                 switch (pair.key)
@@ -551,7 +553,7 @@ namespace Usage_Data_Parser
 
                     case "Y":
                         {
-                            currentFile.magFlux.Y = new MagFluxY();
+                            currentFile.magFlux.Y = new MagFluxMeas();
                             foreach (KeyValuePair pair in array1.pairs)
                             {
                                 switch (pair.key)
@@ -565,6 +567,110 @@ namespace Usage_Data_Parser
                                     case "duration":
                                         {
                                             currentFile.magFlux.Y.duration = pair.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitAccel(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.accel = new Accel();
+
+            foreach (KeyValuePair pairs in array.pairs)
+            {
+                switch (pairs.key)
+                {
+                    case "unit":
+                        {
+                            currentFile.accel.unit = pairs.value;
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            foreach (KeyValueArray array1 in array.array)
+            {
+                switch (array1.arrayName)
+                {
+                    case "X":
+                        {
+                            currentFile.accel.X = new AccelMeas();
+                            foreach (KeyValuePair pair in array1.pairs)
+                            {
+                                switch (pair.key)
+                                {
+                                    case "max":
+                                        {
+                                            currentFile.accel.X.max = pair.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            currentFile.accel.X.duration = pair.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "Y":
+                        {
+                            currentFile.accel.Y = new AccelMeas();
+                            foreach (KeyValuePair pair in array1.pairs)
+                            {
+                                switch (pair.key)
+                                {
+                                    case "max":
+                                        {
+                                            currentFile.accel.Y.max = pair.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            currentFile.accel.Y.duration = pair.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "Z":
+                        {
+                            currentFile.accel.Z = new AccelMeas();
+                            foreach (KeyValuePair pair in array1.pairs)
+                            {
+                                switch (pair.key)
+                                {
+                                    case "max":
+                                        {
+                                            currentFile.accel.Z.max = pair.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            currentFile.accel.Z.duration = pair.value;
                                         }
                                         break;
 

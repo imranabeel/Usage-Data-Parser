@@ -16,6 +16,7 @@ namespace Usage_Data_Parser
         public Battery battery;
         public Temp temp;
         public MagFlux magFlux;
+        public Accel accel;
     }
 
     public class HandConfig
@@ -54,19 +55,9 @@ namespace Usage_Data_Parser
 
     public class Battery
     {
-        public MinBattery min;
-        public MaxBattery max;
+        public BattSample min;
+        public BattSample max;
         public List<BattSample> battSample = new List<BattSample>();
-    }
-
-    public class MinBattery
-    {
-        public BattSample battSample;
-    }
-
-    public class MaxBattery
-    {
-        public BattSample battSample;
     }
 
     public class BattSample
@@ -78,19 +69,9 @@ namespace Usage_Data_Parser
 
     public class Temp
     {
-        public MinTemp minTemp;
-        public MaxTemp maxTemp;
+        public TempSample minTemp;
+        public TempSample maxTemp;
         public List<TempSample> tempSample = new List<TempSample>();
-    }
-
-    public class MaxTemp
-    {
-        public TempSample tempSample;
-    }
-
-    public class MinTemp
-    {
-        public TempSample tempSample;
     }
 
     public class TempSample
@@ -103,17 +84,25 @@ namespace Usage_Data_Parser
     public class MagFlux
     {
         public string unit;
-        public MagFluxX X;
-        public MagFluxY Y;
+        public MagFluxMeas X;
+        public MagFluxMeas Y;
     }
 
-    public class MagFluxX
+    public class MagFluxMeas
     {
         public string max;
         public string duration;
     }
 
-    public class MagFluxY
+    public class Accel
+    {
+        public string unit;
+        public AccelMeas X;
+        public AccelMeas Y;
+        public AccelMeas Z;
+    }
+
+    public class AccelMeas
     {
         public string max;
         public string duration;
