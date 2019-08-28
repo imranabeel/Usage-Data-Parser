@@ -60,134 +60,8 @@ namespace Usage_Data_Parser
             bool key = false;
             var keyValue = new StringBuilder();
 
-            var decoded = get2ndKeyValueArray(1, data);
+            var decoded = getKeyValueArray(1, data); //1 is so it passes the first character of the file.
 
-            //foreach (char c in data)
-            //{
-            //    n++;
-
-            //    if (i > 0)
-            //    {
-            //        i--;
-            //        continue;
-            //    }
-
-            //    if (n == 1)
-            //    {
-            //        if (c != '{')
-            //        {
-            //            Debug.WriteLine("First char not {");
-            //            continue;
-            //        }
-            //    }
-
-            //    if (c == ':')
-            //    {
-            //        continue;
-            //    }
-
-            //    if (c == '"')
-            //    {
-            //        if (!key) //new key value
-            //        {
-            //            keyValue = new StringBuilder();
-            //            key = true;
-            //            continue;
-            //        }
-            //        else //key completed
-            //        {
-            //            var builtString = keyValue.ToString();
-            //            key = false;
-            //            //KEY COMPLETE - do something with it.
-
-            //            Debug.WriteLine(builtString);
-            //            switch (builtString)
-            //            {
-            //                case "$schema":
-            //                    {
-            //                        var decoded = getValue(n, data);
-            //                        Debug.WriteLine(decoded.value);
-            //                        i = decoded.charToSkip;
-            //                    }
-            //                    break;
-
-            //                case "sessionN":
-            //                    {
-            //                        var decoded = getValue(n, data);
-            //                        Debug.WriteLine(decoded.value);
-            //                        i = decoded.charToSkip;
-            //                    }
-            //                    break;
-
-            //                case "handConfig":
-            //                    {
-            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
-            //                        i = decoded.Item2;
-            //                        i -= (builtString.Length);
-            //                    }
-
-            //                    break;
-
-            //                case "resetCause":
-            //                    {
-            //                        var decoded = getValue(n, data);
-            //                        Debug.WriteLine(decoded.value);
-            //                        i = decoded.charToSkip;
-            //                    }
-            //                    break;
-
-            //                case "time":
-            //                    {
-            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
-            //                        i = decoded.Item2;
-            //                        i -= (builtString.Length);
-            //                    }
-            //                    break;
-
-            //                case "grip":
-            //                    {
-            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
-            //                        i = decoded.Item2;
-            //                        i -= (builtString.Length);
-            //                    }
-            //                    break;
-
-            //                case "battery":
-            //                    {
-            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
-            //                        i = decoded.Item2;
-            //                        i -= (builtString.Length);
-            //                    }
-            //                    break;
-
-            //                case "temp":
-            //                    {
-            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
-            //                        i = decoded.Item2;
-            //                        i -= (builtString.Length);
-            //                    }
-            //                    break;
-
-            //                case "magFlux":
-            //                    {
-            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
-            //                        i = decoded.Item2;
-            //                        i -= (builtString.Length);
-            //                    }
-            //                    break;
-
-            //                default: break;
-            //            }
-            //            continue;
-            //        }
-            //    }
-
-            //    if (key) //new key value, but not in value yet.
-            //    {
-            //        keyValue.Append(c);
-            //        continue;
-            //    }
-            //}
             return parsedFile;
         }
 
@@ -229,84 +103,7 @@ namespace Usage_Data_Parser
             return (value, charToSkip);
         }
 
-        public (KeyValueArray, int) getKeyValueArray(int startingPos, string data)
-        {
-            KeyValueArray keyValueArray = new KeyValueArray();
-
-            int skipReturn = 0;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            for (int i = startingPos; i < data.Length; i++)
-            {
-                char c = data.ElementAt(i);
-                skipReturn++;
-
-                if (skip > 0)
-                {
-                    skip--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    skipReturn++; //extra skip for comma
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        if (data.ElementAt(i + 3) == '{')
-                        {
-                            var arrayReturn = get2ndKeyValueArray(i + 1, data);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
-                            skip += arrayReturn.Item2;
-                        }
-                        else
-                        {
-                            KeyValuePair keyValuePair = new KeyValuePair();
-                            keyValuePair.key = builtString;
-
-                            var returned = getValue(i + 1, data);
-                            keyValuePair.value = returned.value;
-
-                            keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = returned.charToSkip;
-                        }
-                        key = false;
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (keyValueArray, skipReturn);
-        }
-
-        public (KeyValueArray, int) get2ndKeyValueArray(int startingPos, string data)
+        public (KeyValueArray, int) getKeyValueArray(int startingPos, string data) //Recursive function to build nested array of json file.
         {
             KeyValueArray keyValueArray = new KeyValueArray();
 
@@ -354,7 +151,7 @@ namespace Usage_Data_Parser
                         {
                             skip += 3;//skip all chars up to "{"
 
-                            var arrayReturn = get2ndKeyValueArray(i + 1, data);
+                            var arrayReturn = getKeyValueArray(i + 1, data);
                             arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
 
