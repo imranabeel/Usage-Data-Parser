@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using MicroJson;
-using System.Diagnostics;
 
 namespace Usage_Data_Parser
 {
@@ -53,16 +47,574 @@ namespace Usage_Data_Parser
         public ParsedJSONFile parseDodgyFile(string data)
         {
             ParsedJSONFile parsedFile = new ParsedJSONFile();
-            int n = 0;
-            int i = 0;
-            int charCount = data.Length;
 
-            bool key = false;
-            var keyValue = new StringBuilder();
+            var decoded = getKeyValueArray(1, data); //1 is so it passes the first character ('"') of the file. This would otherwise cause this function to classify the first field incorrectly.
 
-            var decoded = getKeyValueArray(1, data); //1 is so it passes the first character of the file.
+            foreach (KeyValuePair pair in decoded.Item1.pairs)
+            {
+                switch (pair.key)
+                {
+                    case "sessionN":
+                        {
+                            parsedFile.sessionN = Convert.ToInt32(pair.value);
+                        }
+                        break;
+
+                    case "resetCause":
+                        {
+                            parsedFile.resetCause = pair.value;
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            foreach (KeyValueArray keyValueArray in decoded.Item1.array)
+            {
+                switch (keyValueArray.arrayName)
+                {
+                    case "handConfig":
+                        {
+                            parsedFile = splitHandConfig(keyValueArray, parsedFile);
+                        }
+                        break;
+
+                    case "time":
+                        {
+                            parsedFile = splitTime(keyValueArray, parsedFile);
+                        }
+                        break;
+
+                    case "grip":
+                        {
+                            parsedFile = splitGrip(keyValueArray, parsedFile);
+                        }
+                        break;
+
+                    case "battery":
+                        {
+                            parsedFile = splitBattery(keyValueArray, parsedFile);
+                        }
+                        break;
+
+                    case "temp":
+                        {
+                            parsedFile = splitTemp(keyValueArray, parsedFile);
+                        }
+                        break;
+
+                    case "magFlux":
+                        {
+                            parsedFile = splitMagFlux(keyValueArray, parsedFile);
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
 
             return parsedFile;
+        }
+
+        public ParsedJSONFile splitHandConfig(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.handConfig = new HandConfig();
+            foreach (KeyValuePair pair in array.pairs)
+            {
+                switch (pair.key)
+                {
+                    case "serialNum":
+                        {
+                            currentFile.handConfig.serialNum = pair.value;
+                        }
+                        break;
+
+                    case "fwVer":
+                        {
+                            currentFile.handConfig.fwVer = pair.value;
+                        }
+                        break;
+
+                    case "chirality":
+                        {
+                            currentFile.handConfig.chirality = pair.value;
+                        }
+                        break;
+
+                    case "nMotors":
+                        {
+                            currentFile.handConfig.nMotors = pair.value;
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitTime(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.time = new Time();
+            foreach (KeyValuePair pair in array.pairs)
+            {
+                switch (pair.key)
+                {
+                    case "onTime":
+                        {
+                            currentFile.time.onTime = pair.value;
+                        }
+                        break;
+
+                    case "activeTime":
+                        {
+                            currentFile.time.activeTime = pair.value;
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitGrip(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.grip = new GripParent();
+
+            foreach (KeyValueArray array1 in array.array)
+            {
+                switch (array1.arrayName)
+                {
+                    case "group":
+                        {
+                            Group group = new Group();
+                            foreach (KeyValuePair pair in array1.pairs)
+                            {
+                                switch (pair.key)
+                                {
+                                    case "n":
+                                        {
+                                            group.n = pair.value;
+                                        }
+                                        break;
+
+                                    case "size":
+                                        {
+                                            group.size = pair.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+
+                            foreach (KeyValueArray array2 in array1.array)
+                            {
+                                switch (array2.arrayName)
+                                {
+                                    case "grip":
+                                        {
+                                            GripChild gripChild = new GripChild();
+                                            foreach (KeyValuePair pair in array2.pairs)
+                                            {
+                                                switch (pair.key)
+                                                {
+                                                    case "n":
+                                                        {
+                                                            gripChild.n = pair.value;
+                                                        }
+                                                        break;
+
+                                                    case "name":
+                                                        {
+                                                            gripChild.name = pair.value;
+                                                        }
+                                                        break;
+
+                                                    case "gripStr":
+                                                        {
+                                                            gripChild.gripStr = pair.value;
+                                                        }
+                                                        break;
+
+                                                    case "duration":
+                                                        {
+                                                            gripChild.duration = pair.value;
+                                                        }
+                                                        break;
+
+                                                    default: break;
+                                                }
+                                            }
+                                            group.grip.Add(gripChild);
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                            currentFile.grip.group.Add(group);
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitBattery(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.battery = new Battery();
+
+            foreach (KeyValueArray array1 in array.array)
+            {
+                switch (array1.arrayName)
+                {
+                    case "min":
+                        {
+                            currentFile.battery.min = new MinBattery();
+                            foreach (KeyValueArray array2 in array1.array)
+                            {
+                                switch (array2.arrayName)
+                                {
+                                    case "battSample":
+                                        {
+                                            currentFile.battery.min.battSample = new BattSample();
+                                            foreach (KeyValuePair pairs in array2.pairs)
+                                            {
+                                                switch (pairs.key)
+                                                {
+                                                    case "n":
+                                                        {
+                                                            currentFile.battery.min.battSample.n = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "battV":
+                                                        {
+                                                            currentFile.battery.min.battSample.battV = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "duration":
+                                                        {
+                                                            currentFile.battery.min.battSample.duration = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    default: break;
+                                                }
+                                            }
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "max":
+                        {
+                            currentFile.battery.max = new MaxBattery();
+                            foreach (KeyValueArray array2 in array1.array)
+                            {
+                                switch (array2.arrayName)
+                                {
+                                    case "battSample":
+                                        {
+                                            currentFile.battery.max.battSample = new BattSample();
+                                            foreach (KeyValuePair pairs in array2.pairs)
+                                            {
+                                                switch (pairs.key)
+                                                {
+                                                    case "n":
+                                                        {
+                                                            currentFile.battery.max.battSample.n = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "battV":
+                                                        {
+                                                            currentFile.battery.max.battSample.battV = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "duration":
+                                                        {
+                                                            currentFile.battery.max.battSample.duration = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    default: break;
+                                                }
+                                            }
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "battSample":
+                        {
+                            BattSample battSample = new BattSample();
+                            foreach (KeyValuePair pairs in array1.pairs)
+                            {
+                                switch (pairs.key)
+                                {
+                                    case "n":
+                                        {
+                                            battSample.n = pairs.value;
+                                        }
+                                        break;
+
+                                    case "battV":
+                                        {
+                                            battSample.battV = pairs.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            battSample.duration = pairs.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                            currentFile.battery.battSample.Add(battSample);
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitTemp(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.temp = new Temp();
+
+            foreach (KeyValueArray array1 in array.array)
+            {
+                switch (array1.arrayName)
+                {
+                    case "min":
+                        {
+                            currentFile.temp.minTemp = new MinTemp();
+                            foreach (KeyValueArray array2 in array1.array)
+                            {
+                                switch (array2.arrayName)
+                                {
+                                    case "tempSample":
+                                        {
+                                            currentFile.temp.minTemp.tempSample = new TempSample();
+                                            foreach (KeyValuePair pairs in array2.pairs)
+                                            {
+                                                switch (pairs.key)
+                                                {
+                                                    case "n":
+                                                        {
+                                                            currentFile.temp.minTemp.tempSample.n = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "tempC":
+                                                        {
+                                                            currentFile.temp.minTemp.tempSample.tempC = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "duration":
+                                                        {
+                                                            currentFile.temp.minTemp.tempSample.duration = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    default: break;
+                                                }
+                                            }
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "max":
+                        {
+                            currentFile.temp.maxTemp = new MaxTemp();
+                            foreach (KeyValueArray array2 in array1.array)
+                            {
+                                switch (array2.arrayName)
+                                {
+                                    case "tempSample":
+                                        {
+                                            currentFile.temp.maxTemp.tempSample = new TempSample();
+                                            foreach (KeyValuePair pairs in array2.pairs)
+                                            {
+                                                switch (pairs.key)
+                                                {
+                                                    case "n":
+                                                        {
+                                                            currentFile.temp.maxTemp.tempSample.n = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "tempC":
+                                                        {
+                                                            currentFile.temp.maxTemp.tempSample.tempC = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    case "duration":
+                                                        {
+                                                            currentFile.temp.maxTemp.tempSample.duration = pairs.value;
+                                                        }
+                                                        break;
+
+                                                    default: break;
+                                                }
+                                            }
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "tempSample":
+                        {
+                            TempSample tempSample = new TempSample();
+                            foreach (KeyValuePair pairs in array1.pairs)
+                            {
+                                switch (pairs.key)
+                                {
+                                    case "n":
+                                        {
+                                            tempSample.n = pairs.value;
+                                        }
+                                        break;
+
+                                    case "tempC":
+                                        {
+                                            tempSample.tempC = pairs.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            tempSample.duration = pairs.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                            currentFile.temp.tempSample.Add(tempSample);
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitMagFlux(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.magFlux = new MagFlux();
+
+            foreach (KeyValuePair pairs in array.pairs)
+            {
+                switch (pairs.key)
+                {
+                    case "unit":
+                        {
+                            currentFile.magFlux.unit = pairs.value;
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            foreach (KeyValueArray array1 in array.array)
+            {
+                switch (array1.arrayName)
+                {
+                    case "X":
+                        {
+                            currentFile.magFlux.X = new MagFluxX();
+                            foreach (KeyValuePair pair in array1.pairs)
+                            {
+                                switch (pair.key)
+                                {
+                                    case "max":
+                                        {
+                                            currentFile.magFlux.X.max = pair.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            currentFile.magFlux.X.duration = pair.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "Y":
+                        {
+                            currentFile.magFlux.Y = new MagFluxY();
+                            foreach (KeyValuePair pair in array1.pairs)
+                            {
+                                switch (pair.key)
+                                {
+                                    case "max":
+                                        {
+                                            currentFile.magFlux.Y.max = pair.value;
+                                        }
+                                        break;
+
+                                    case "duration":
+                                        {
+                                            currentFile.magFlux.Y.duration = pair.value;
+                                        }
+                                        break;
+
+                                    default: break;
+                                }
+                            }
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
+
+            return currentFile;
         }
 
         public (string value, int charToSkip) getValue(int startingPos, string data)
@@ -198,14 +750,14 @@ namespace Usage_Data_Parser
 
         public class ParsedJSONFile
         {
-            private int sessionN;
-            private HandConfig handConfig;
-            private string resetCause;
-            private Time time;
-            private GripParent grip;
-            private Battery battery;
-            private Temp temp;
-            private MagFlux magFlux;
+            public int sessionN;
+            public HandConfig handConfig;
+            public string resetCause;
+            public Time time;
+            public GripParent grip;
+            public Battery battery;
+            public Temp temp;
+            public MagFlux magFlux;
         }
 
         public class HandConfig
@@ -224,89 +776,89 @@ namespace Usage_Data_Parser
 
         public class GripParent
         {
-            private Group[] group;
+            public List<Group> group = new List<Group>();
         }
 
         public class Group
         {
-            private string n;
-            private string size;
-            private GripChild[] grip;
+            public string n;
+            public string size;
+            public List<GripChild> grip = new List<GripChild>();
         }
 
         public class GripChild
         {
-            private string n;
-            private string name;
-            private string gripStr;
-            private string duration;
+            public string n;
+            public string name;
+            public string gripStr;
+            public string duration;
         }
 
         public class Battery
         {
-            private MinBattery min;
-            private MaxBattery max;
-            private BattSample[] battSample;
+            public MinBattery min;
+            public MaxBattery max;
+            public List<BattSample> battSample = new List<BattSample>();
         }
 
         public class MinBattery
         {
-            private BattSample battSample;
+            public BattSample battSample;
         }
 
         public class MaxBattery
         {
-            private BattSample battSample;
+            public BattSample battSample;
         }
 
         public class BattSample
         {
-            private string n;
-            private string battV;
-            private string duration;
+            public string n;
+            public string battV;
+            public string duration;
         }
 
         public class Temp
         {
-            private MinTemp minTemp;
-            private MaxTemp maxTemp;
-            private TempSample[] tempSample;
+            public MinTemp minTemp;
+            public MaxTemp maxTemp;
+            public List<TempSample> tempSample = new List<TempSample>();
         }
 
         public class MaxTemp
         {
-            private TempSample tempSample;
+            public TempSample tempSample;
         }
 
         public class MinTemp
         {
-            private TempSample tempSample;
+            public TempSample tempSample;
         }
 
         public class TempSample
         {
-            private string n;
-            private string tempC;
-            private string duration;
+            public string n;
+            public string tempC;
+            public string duration;
         }
 
         public class MagFlux
         {
-            private string unit;
-            private MagFluxX X;
-            private MagFluxY Y;
+            public string unit;
+            public MagFluxX X;
+            public MagFluxY Y;
         }
 
         public class MagFluxX
         {
-            private string max;
-            private string duration;
+            public string max;
+            public string duration;
         }
 
         public class MagFluxY
         {
-            private string max;
-            private string duration;
+            public string max;
+            public string duration;
         }
     }
 }
