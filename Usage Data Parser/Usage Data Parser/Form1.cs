@@ -60,139 +60,141 @@ namespace Usage_Data_Parser
             bool key = false;
             var keyValue = new StringBuilder();
 
-            foreach (char c in data)
-            {
-                n++;
+            var decoded = get2ndKeyValueArray(1, data);
 
-                if (i > 0)
-                {
-                    i--;
-                    continue;
-                }
+            //foreach (char c in data)
+            //{
+            //    n++;
 
-                if (n == 1)
-                {
-                    if (c != '{')
-                    {
-                        Debug.WriteLine("First char not {");
-                        continue;
-                    }
-                }
+            //    if (i > 0)
+            //    {
+            //        i--;
+            //        continue;
+            //    }
 
-                if (c == ':')
-                {
-                    continue;
-                }
+            //    if (n == 1)
+            //    {
+            //        if (c != '{')
+            //        {
+            //            Debug.WriteLine("First char not {");
+            //            continue;
+            //        }
+            //    }
 
-                if (c == '"')
-                {
-                    if (!key) //new key value
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else //key completed
-                    {
-                        var builtString = keyValue.ToString();
-                        key = false;
-                        //KEY COMPLETE - do something with it.
+            //    if (c == ':')
+            //    {
+            //        continue;
+            //    }
 
-                        Debug.WriteLine(builtString);
-                        switch (builtString)
-                        {
-                            case "$schema":
-                                {
-                                    KeyValue keyValue1 = getValue(n, data);
-                                    Debug.WriteLine(keyValue1.value);
-                                    i = keyValue1.charToSkip;
-                                }
-                                break;
+            //    if (c == '"')
+            //    {
+            //        if (!key) //new key value
+            //        {
+            //            keyValue = new StringBuilder();
+            //            key = true;
+            //            continue;
+            //        }
+            //        else //key completed
+            //        {
+            //            var builtString = keyValue.ToString();
+            //            key = false;
+            //            //KEY COMPLETE - do something with it.
 
-                            case "sessionN":
-                                {
-                                    KeyValue keyValue2 = getValue(n, data);
-                                    Debug.WriteLine(keyValue2.value);
-                                    i = keyValue2.charToSkip;
-                                }
-                                break;
+            //            Debug.WriteLine(builtString);
+            //            switch (builtString)
+            //            {
+            //                case "$schema":
+            //                    {
+            //                        var decoded = getValue(n, data);
+            //                        Debug.WriteLine(decoded.value);
+            //                        i = decoded.charToSkip;
+            //                    }
+            //                    break;
 
-                            case "handConfig":
-                                {
-                                    var decoded = getKeyValueArray(n - (builtString.Length + 2), data, 0);
-                                    i = decoded.Item2;
-                                    i -= (builtString.Length + 2);
-                                }
+            //                case "sessionN":
+            //                    {
+            //                        var decoded = getValue(n, data);
+            //                        Debug.WriteLine(decoded.value);
+            //                        i = decoded.charToSkip;
+            //                    }
+            //                    break;
 
-                                break;
+            //                case "handConfig":
+            //                    {
+            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
+            //                        i = decoded.Item2;
+            //                        i -= (builtString.Length);
+            //                    }
 
-                            case "resetCause":
-                                {
-                                    KeyValue keyValue2 = getValue(n, data);
-                                    Debug.WriteLine(keyValue2.value);
-                                    i = keyValue2.charToSkip;
-                                }
-                                break;
+            //                    break;
 
-                            case "time":
-                                {
-                                    var decoded = getKeyValueArray(n - (builtString.Length + 2), data, 0);
-                                    i = decoded.Item2;
-                                    i -= (builtString.Length + 2);
-                                }
-                                break;
+            //                case "resetCause":
+            //                    {
+            //                        var decoded = getValue(n, data);
+            //                        Debug.WriteLine(decoded.value);
+            //                        i = decoded.charToSkip;
+            //                    }
+            //                    break;
 
-                            case "grip":
-                                {
-                                    var decoded = getKeyValueArray(n - (builtString.Length + 2), data, 0);
-                                    i = decoded.Item2;
-                                    i -= (builtString.Length + 2);
-                                }
-                                break;
+            //                case "time":
+            //                    {
+            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
+            //                        i = decoded.Item2;
+            //                        i -= (builtString.Length);
+            //                    }
+            //                    break;
 
-                            case "battery":
-                                {
-                                    var decoded = getKeyValueArray(n - (builtString.Length + 2), data, 0);
-                                    i = decoded.Item2;
-                                    i -= (builtString.Length + 2);
-                                }
-                                break;
+            //                case "grip":
+            //                    {
+            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
+            //                        i = decoded.Item2;
+            //                        i -= (builtString.Length);
+            //                    }
+            //                    break;
 
-                            case "temp":
-                                {
-                                    var decoded = getKeyValueArray(n - (builtString.Length + 2), data, 0);
-                                    i = decoded.Item2;
-                                    i -= (builtString.Length + 2);
-                                }
-                                break;
+            //                case "battery":
+            //                    {
+            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
+            //                        i = decoded.Item2;
+            //                        i -= (builtString.Length);
+            //                    }
+            //                    break;
 
-                            case "magFlux":
-                                {
-                                    var decoded = getKeyValueArray(n - (builtString.Length + 2), data, 0);
-                                    i = decoded.Item2;
-                                    i -= (builtString.Length + 2);
-                                }
-                                break;
+            //                case "temp":
+            //                    {
+            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
+            //                        i = decoded.Item2;
+            //                        i -= (builtString.Length);
+            //                    }
+            //                    break;
 
-                            default: break;
-                        }
-                        continue;
-                    }
-                }
+            //                case "magFlux":
+            //                    {
+            //                        var decoded = get2ndKeyValueArray(n - (builtString.Length + 2), data);
+            //                        i = decoded.Item2;
+            //                        i -= (builtString.Length);
+            //                    }
+            //                    break;
 
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
+            //                default: break;
+            //            }
+            //            continue;
+            //        }
+            //    }
+
+            //    if (key) //new key value, but not in value yet.
+            //    {
+            //        keyValue.Append(c);
+            //        continue;
+            //    }
+            //}
             return parsedFile;
         }
 
-        public KeyValue getValue(int startingPos, string data)
+        public (string value, int charToSkip) getValue(int startingPos, string data)
         {
-            KeyValue keyValue = new KeyValue();
-            keyValue.value = "";
+            string value = "";
+            int charToSkip = 0;
 
             bool valueStarted = false;
 
@@ -201,7 +203,7 @@ namespace Usage_Data_Parser
             for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
-                keyValue.charToSkip++;
+                charToSkip++;
 
                 if (((c == ':') || c == (' ')) && (!valueStarted))
                 {
@@ -216,128 +218,20 @@ namespace Usage_Data_Parser
 
                 if ((c == '"') && (data.ElementAt(i + 1) == ',') && (valueStarted))
                 {
-                    keyValue.charToSkip++; //skip comma as well.
-                    keyValue.value = tempString.ToString();
+                    charToSkip++; //skip comma as well.
+                    value = tempString.ToString();
                     break;
                 }
 
                 tempString.Append(c);
             }
 
-            return keyValue;
+            return (value, charToSkip);
         }
 
-        public (HandConfig, int) getHandConfig(int startingPos, string data)
-        {
-            HandConfig handConfig = new HandConfig();
-            handConfig.serialNum = "";
-            handConfig.fwVer = "";
-            handConfig.chirality = "";
-            handConfig.nMotors = "";
-
-            int charToSkip = 0;
-
-            int j = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            for (int i = startingPos; i < (data.Length - startingPos); i++)
-            {
-                char c = data.ElementAt(i);
-                charToSkip++;
-
-                if (j > 0)
-                {
-                    j--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || c == ('{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    charToSkip++;
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        key = false;
-                        //KEY COMPLETE - do something with it.
-
-                        Debug.WriteLine(builtString);
-                        switch (builtString)
-                        {
-                            case "serialNum":
-                                {
-                                    KeyValue keyValue1 = getValue(i + 1, data);
-                                    Debug.WriteLine(keyValue1.value);
-                                    j = keyValue1.charToSkip;
-                                    handConfig.serialNum = keyValue1.value;
-                                }
-                                break;
-
-                            case "fwVer":
-                                {
-                                    KeyValue keyValue1 = getValue(i + 1, data);
-                                    Debug.WriteLine(keyValue1.value);
-                                    j = keyValue1.charToSkip;
-                                    handConfig.fwVer = keyValue1.value;
-                                }
-                                break;
-
-                            case "chirality":
-                                {
-                                    KeyValue keyValue1 = getValue(i + 1, data);
-                                    Debug.WriteLine(keyValue1.value);
-                                    j = keyValue1.charToSkip;
-                                    handConfig.chirality = keyValue1.value;
-                                }
-                                break;
-
-                            case "nMotors":
-                                {
-                                    KeyValue keyValue1 = getValue(i + 1, data);
-                                    Debug.WriteLine(keyValue1.value);
-                                    j = keyValue1.charToSkip;
-                                    handConfig.nMotors = keyValue1.value;
-                                }
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (handConfig, charToSkip);
-        }
-
-        public (KeyValueArray, int, int) getKeyValueArray(int startingPos, string data, int depth)
+        public (KeyValueArray, int) getKeyValueArray(int startingPos, string data)
         {
             KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
 
             int skipReturn = 0;
 
@@ -345,8 +239,6 @@ namespace Usage_Data_Parser
 
             bool key = false;
             var keyValue = new StringBuilder();
-
-            int numPairs = 0;
 
             for (int i = startingPos; i < data.Length; i++)
             {
@@ -383,11 +275,7 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            //keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
-
-                            localDepth++;
-                            var arrayReturn = get2ndKeyValueArray(i + 1, data, localDepth);
+                            var arrayReturn = get2ndKeyValueArray(i + 1, data);
                             arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
                             skip += arrayReturn.Item2;
@@ -397,12 +285,12 @@ namespace Usage_Data_Parser
                             KeyValuePair keyValuePair = new KeyValuePair();
                             keyValuePair.key = builtString;
 
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
+                            var returned = getValue(i + 1, data);
+                            keyValuePair.value = returned.value;
 
                             keyValueArray.pairs.Add(keyValuePair);
 
-                            skip = keyValue1.charToSkip;
+                            skip = returned.charToSkip;
                         }
                         key = false;
                     }
@@ -415,14 +303,12 @@ namespace Usage_Data_Parser
                 }
             }
 
-            return (keyValueArray, skipReturn, depth);
+            return (keyValueArray, skipReturn);
         }
 
-        public (KeyValueArray, int, int) get2ndKeyValueArray(int startingPos, string data, int depth)
+        public (KeyValueArray, int) get2ndKeyValueArray(int startingPos, string data)
         {
             KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
 
             int skipReturn = 0;
 
@@ -430,8 +316,6 @@ namespace Usage_Data_Parser
 
             bool key = false;
             var keyValue = new StringBuilder();
-
-            int numPairs = 0;
 
             for (int i = startingPos; i < data.Length; i++)
             {
@@ -468,12 +352,9 @@ namespace Usage_Data_Parser
                         var builtString = keyValue.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            //keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
                             skip += 3;//skip all chars up to "{"
 
-                            localDepth++;
-                            var arrayReturn = get3rdKeyValueArray(i + 1, data, localDepth);
+                            var arrayReturn = get2ndKeyValueArray(i + 1, data);
                             arrayReturn.Item1.arrayName = keyValue.ToString();
                             keyValueArray.array.Add(arrayReturn.Item1);
 
@@ -484,12 +365,12 @@ namespace Usage_Data_Parser
                             KeyValuePair keyValuePair = new KeyValuePair();
                             keyValuePair.key = builtString;
 
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
+                            var returned = getValue(i + 1, data);
+                            keyValuePair.value = returned.value;
 
                             keyValueArray.pairs.Add(keyValuePair);
 
-                            skip = keyValue1.charToSkip;
+                            skip = returned.charToSkip;
                         }
                         key = false;
                     }
@@ -502,443 +383,7 @@ namespace Usage_Data_Parser
                 }
             }
 
-            return (keyValueArray, skipReturn, depth);
-        }
-
-        public (KeyValueArray, int, int) get3rdKeyValueArray(int startingPos, string data, int depth)
-        {
-            KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
-
-            int skipReturn = 0;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            int numPairs = 0;
-
-            for (int i = startingPos; i < data.Length; i++)
-            {
-                char c = data.ElementAt(i);
-                skipReturn++;
-
-                if (skip > 0)
-                {
-                    skip--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    skipReturn--; //extra skip for comma
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        if (data.ElementAt(i + 3) == '{')
-                        {
-                            //keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
-                            skip += 3;//skip all chars up to "{"
-
-                            localDepth++;
-                            var arrayReturn = get4thKeyValueArray(i + 1, data, localDepth);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
-                            skip += arrayReturn.Item2;
-                        }
-                        else
-                        {
-                            KeyValuePair keyValuePair = new KeyValuePair();
-                            keyValuePair.key = builtString;
-
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
-
-                            keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = keyValue1.charToSkip;
-                        }
-                        key = false;
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (keyValueArray, skipReturn, depth);
-        }
-
-        public (KeyValueArray, int, int) get4thKeyValueArray(int startingPos, string data, int depth)
-        {
-            KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
-
-            int skipReturn = 0;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            int numPairs = 0;
-
-            for (int i = startingPos; i < data.Length; i++)
-            {
-                char c = data.ElementAt(i);
-                skipReturn++;
-
-                if (skip > 0)
-                {
-                    skip--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    skipReturn--; //extra skip for comma
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        if (data.ElementAt(i + 3) == '{')
-                        {
-                            // keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
-                            skip += 3;//skip all chars up to "{"
-
-                            localDepth++;
-                            var arrayReturn = get5thKeyValueArray(i + 1, data, localDepth);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
-                            skip += arrayReturn.Item2;
-                        }
-                        else
-                        {
-                            KeyValuePair keyValuePair = new KeyValuePair();
-                            keyValuePair.key = builtString;
-
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
-
-                            keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = keyValue1.charToSkip;
-                        }
-                        key = false;
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (keyValueArray, skipReturn, depth);
-        }
-
-        public (KeyValueArray, int, int) get5thKeyValueArray(int startingPos, string data, int depth)
-        {
-            KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
-
-            int skipReturn = 0;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            int numPairs = 0;
-
-            for (int i = startingPos; i < data.Length; i++)
-            {
-                char c = data.ElementAt(i);
-                skipReturn++;
-
-                if (skip > 0)
-                {
-                    skip--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    skipReturn--; //extra skip for comma
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        if (data.ElementAt(i + 3) == '{')
-                        {
-                            // keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
-                            skip += 3;//skip all chars up to "{"
-
-                            localDepth++;
-                            var arrayReturn = get6thKeyValueArray(i + 1, data, localDepth);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
-                            skip += arrayReturn.Item2;
-                        }
-                        else
-                        {
-                            KeyValuePair keyValuePair = new KeyValuePair();
-                            keyValuePair.key = builtString;
-
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
-
-                            keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = keyValue1.charToSkip;
-                        }
-                        key = false;
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (keyValueArray, skipReturn, depth);
-        }
-
-        public (KeyValueArray, int, int) get6thKeyValueArray(int startingPos, string data, int depth)
-        {
-            KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
-
-            int skipReturn = 0;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            int numPairs = 0;
-
-            for (int i = startingPos; i < data.Length; i++)
-            {
-                char c = data.ElementAt(i);
-                skipReturn++;
-
-                if (skip > 0)
-                {
-                    skip--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    skipReturn--; //extra skip for comma
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        if (data.ElementAt(i + 3) == '{')
-                        {
-                            //keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
-                            skip += 3;//skip all chars up to "{"
-
-                            localDepth++;
-                            var arrayReturn = get7thKeyValueArray(i + 1, data, localDepth);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
-                            skip += arrayReturn.Item2;
-                        }
-                        else
-                        {
-                            KeyValuePair keyValuePair = new KeyValuePair();
-                            keyValuePair.key = builtString;
-
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
-
-                            keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = keyValue1.charToSkip;
-                        }
-                        key = false;
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (keyValueArray, skipReturn, depth);
-        }
-
-        public (KeyValueArray, int, int) get7thKeyValueArray(int startingPos, string data, int depth)
-        {
-            KeyValueArray keyValueArray = new KeyValueArray();
-
-            int localDepth = depth;
-
-            int skipReturn = 0;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
-
-            int numPairs = 0;
-
-            for (int i = startingPos; i < data.Length; i++)
-            {
-                char c = data.ElementAt(i);
-                skipReturn++;
-
-                if (skip > 0)
-                {
-                    skip--;
-                    continue;
-                }
-
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
-                {
-                    continue;
-                }
-
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
-                {
-                    skipReturn--; //extra skip for comma
-                    break;
-                }
-
-                if (c == '"')
-                {
-                    if (!key)
-                    {
-                        keyValue = new StringBuilder();
-                        key = true;
-                        continue;
-                    }
-                    else
-                    {
-                        var builtString = keyValue.ToString();
-                        if (data.ElementAt(i + 3) == '{')
-                        {
-                            //keyValueArray.arrayName = keyValue.ToString();
-                            key = false;
-                            skip += 3;//skip all chars up to "{"
-
-                            localDepth++;
-                            var arrayReturn = getKeyValueArray(i + 1, data, localDepth);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
-                            skip += arrayReturn.Item2;
-                        }
-                        else
-                        {
-                            KeyValuePair keyValuePair = new KeyValuePair();
-                            keyValuePair.key = builtString;
-
-                            KeyValue keyValue1 = getValue(i + 1, data);
-                            keyValuePair.value = keyValue1.value;
-
-                            keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = keyValue1.charToSkip;
-                        }
-                        key = false;
-                    }
-                }
-
-                if (key) //new key value, but not in value yet.
-                {
-                    keyValue.Append(c);
-                    continue;
-                }
-            }
-
-            return (keyValueArray, skipReturn, depth);
-        }
-
-        public class KeyValue
-        {
-            public int charToSkip { get; set; }
-            public string value { get; set; }
+            return (keyValueArray, skipReturn);
         }
 
         public class KeyValueArray
