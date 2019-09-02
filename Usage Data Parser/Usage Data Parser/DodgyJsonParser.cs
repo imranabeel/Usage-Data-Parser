@@ -220,14 +220,14 @@ namespace Usage_Data_Parser
                                                     default: break;
                                                 }
                                             }
-                                            group.grip.Add(gripChild);
+                                            group.grips.Add(gripChild);
                                         }
                                         break;
 
                                     default: break;
                                 }
                             }
-                            currentFile.grip.group.Add(group);
+                            currentFile.grip.gripGroups.Add(group);
                         }
                         break;
 
@@ -360,7 +360,7 @@ namespace Usage_Data_Parser
                                     default: break;
                                 }
                             }
-                            currentFile.battery.battSample.Add(battSample);
+                            currentFile.battery.battSamples.Add(battSample);
                         }
                         break;
 
@@ -493,7 +493,7 @@ namespace Usage_Data_Parser
                                     default: break;
                                 }
                             }
-                            currentFile.temp.tempSample.Add(tempSample);
+                            currentFile.temp.tempSamples.Add(tempSample);
                         }
                         break;
 

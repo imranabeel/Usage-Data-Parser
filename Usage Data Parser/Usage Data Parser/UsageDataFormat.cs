@@ -35,14 +35,14 @@ namespace Usage_Data_Parser
 
     public class GripParent
     {
-        public List<Group> group = new List<Group>();
+        public List<Group> gripGroups = new List<Group>();
     }
 
     public class Group
     {
         public string n;
         public string size;
-        public List<GripChild> grip = new List<GripChild>();
+        public List<GripChild> grips = new List<GripChild>();
     }
 
     public class GripChild
@@ -57,7 +57,7 @@ namespace Usage_Data_Parser
     {
         public BattSample min;
         public BattSample max;
-        public List<BattSample> battSample = new List<BattSample>();
+        public List<BattSample> battSamples = new List<BattSample>();
     }
 
     public class BattSample
@@ -71,7 +71,7 @@ namespace Usage_Data_Parser
     {
         public TempSample minTemp;
         public TempSample maxTemp;
-        public List<TempSample> tempSample = new List<TempSample>();
+        public List<TempSample> tempSamples = new List<TempSample>();
     }
 
     public class TempSample
