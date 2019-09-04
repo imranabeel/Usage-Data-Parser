@@ -853,7 +853,7 @@ namespace Usage_Data_Parser
                             {
                                 if (depth > 0) //Not at root node yet, so lets keep breaking out of this function until we get there.
                                 {
-                                    skipReturn += (localSkip - 1); //If this doesn't exist, recursively dropping down through the functions will result in 1 char being skipped for each function depth. Not sure why.
+                                    skipReturn += (localSkip - 1); //If "-1" doesn't exist, recursively dropping down through the functions will result in 1 char being skipped (i.e skipReturn is too large) for each function depth. Not sure why.
                                     break;
                                 }
                             }
