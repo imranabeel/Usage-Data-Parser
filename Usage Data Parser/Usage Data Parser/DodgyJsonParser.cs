@@ -739,287 +739,148 @@ namespace Usage_Data_Parser
                 char c = data.ElementAt(i);
                 charToSkip++;
 
+                if (c == '\0')
+                {
+                    break;
+                }
+
                 if (((c == ':') || c == (' ')) && (!valueStarted))
                 {
                     continue;
                 }
 
-                if ((c == '"') && (!valueStarted))
+                if (c == '"')
                 {
-                    valueStarted = true;
-                    continue;
+                    if (!valueStarted)
+                    {
+                        valueStarted = true;
+                        continue;
+                    }
+                    else
+                    {
+                        if (data.ElementAt(i + 1) == ',') // comma after " char, so end of value.
+                        {
+                            value = tempString.ToString();
+                            charToSkip++; //skip comma as well.
+                            break;
+                        }
+                    }
                 }
 
-                if ((c == '"') && (data.ElementAt(i + 1) == ',') && (valueStarted))
+                if (valueStarted)
                 {
-                    charToSkip++; //skip comma as well.
-                    value = tempString.ToString();
-                    break;
+                    tempString.Append(c);
                 }
-
-                tempString.Append(c);
             }
 
             return (value, charToSkip);
         }
 
-        public bool checkUnexpectedKeys(string key, string val)
-        {
-            bool expected = false;
-            switch (key)
-            {
-                case "handConfig":
-                    {
-                        Type t = typeof(WORDS.HANDCONFIG);
-                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-
-                        foreach (System.Reflection.FieldInfo field in fields)
-                        {
-                            if (val == field.GetValue(null).ToString())
-                            {
-                                expected = true;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "error":
-                    {
-                        Type t = typeof(WORDS.ERROR);
-                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-
-                        foreach (System.Reflection.FieldInfo field in fields)
-                        {
-                            if (val == field.GetValue(null).ToString())
-                            {
-                                expected = true;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "time":
-                    {
-                        Type t = typeof(WORDS.TIME);
-                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-
-                        foreach (System.Reflection.FieldInfo field in fields)
-                        {
-                            if (val == field.GetValue(null).ToString())
-                            {
-                                expected = true;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "grip":
-                    {
-                        Type t = typeof(WORDS.GRIP.GROUP.GRIP);
-                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-
-                        foreach (System.Reflection.FieldInfo field in fields)
-                        {
-                            if (val == field.GetValue(null).ToString())
-                            {
-                                expected = true;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "group":
-                    {
-                        Type t = typeof(WORDS.GRIP.GROUP);
-                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-
-                        foreach (System.Reflection.FieldInfo field in fields)
-                        {
-                            if (val == field.GetValue(null).ToString())
-                            {
-                                expected = true;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "battery":
-                    {
-                        Type t = typeof(WORDS.BATTERY);
-                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-
-                        foreach (System.Reflection.FieldInfo field in fields)
-                        {
-                            if (val == field.GetValue(null).ToString())
-                            {
-                                expected = true;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-
-                case "min":
-                    {
-                    }
-                    break;
-
-                case "max":
-                    {
-                    }
-                    break;
-
-                case "battSample":
-                    {
-                    }
-                    break;
-
-                case "temp":
-                    {
-                    }
-                    break;
-
-                case "tempSample":
-                    {
-                    }
-                    break;
-
-                case "magFlux":
-                    {
-                    }
-                    break;
-
-                case "X":
-                    {
-                    }
-                    break;
-
-                case "Y":
-                    {
-                    }
-                    break;
-
-                case "Z":
-                    {
-                    }
-                    break;
-
-                case "accel":
-                    {
-                    }
-                    break;
-
-                default: break;
-            }
-
-            return expected;
-        }
-
-        public (KeyValueArray, int, bool) getKeyValueArray(int startingPos, string data, int depth) //Recursive function to build nested array of json file.
+        public (KeyValueArray array, int skip, bool dodgy) getKeyValueArray(int startingPos, string data, int depth)
         {
             KeyValueArray keyValueArray = new KeyValueArray();
+            bool dodgy = false;
+            bool key = false;
+            var keyString = new StringBuilder();
 
             int skipReturn = 0;
-
-            bool dodgy = false;
-
-            int skip = 0;
-
-            bool key = false;
-            var keyValue = new StringBuilder();
+            int localSkip = 0;
 
             for (int i = startingPos; i < data.Length; i++)
             {
                 char c = data.ElementAt(i);
-                skipReturn++;
+                skipReturn++; //we're checking the next char, so skip this in the recursive function below this level.
 
-                if (skip > 0)
+                if (localSkip > 0) // skip over chars checked in getValue;
                 {
-                    skip--;
+                    localSkip--;
                     continue;
                 }
 
                 if (c == '\0') //null character, reached dodgy point in file.
                 {
                     dodgy = true;
+                    //check next 20 characters for a tab. This is to iterate over any additional null characters that are occasionally present when the first null char is found.
+                    for (int j = 1; j < 20; j++) //starts at 1, because 0 would result in checking the same char we've just checked
+                    {
+                        int charIndex = i + j;
+                        char tab = data.ElementAt(charIndex);
+                        if (tab == '\t') // check for tab char
+                        {
+                            skipReturn += j; //increment skipReturn value by number of chars we've checked.
+                            break;
+                        }
+                    }
                     break;
                 }
 
-                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
+                if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key)) // control chars. Skip these.
                 {
                     continue;
                 }
 
-                if ((c == '}') && (data.ElementAt(i + 1) == ','))
+                if ((c == '}') && (data.ElementAt(i + 1) == ',')) // if close bracket and comma straight after, then we are done with this level of array. Skip out of this function and recursively drop down to previous level.
                 {
-                    skipReturn--; //extra skip for comma
+                    skipReturn--; // this is -1 as we want the recursive function below this to also see this } character, so that the array depths don't just keep increasing.
                     break;
                 }
 
-                if (c == '"')
+                if (c == '"') //Start/End of Key String.
                 {
-                    if (!key)
+                    if (!key) //Start of Key String
                     {
-                        keyValue = new StringBuilder();
+                        keyString = new StringBuilder();
                         key = true;
                         continue;
                     }
-                    else
+                    else //End of Key String - Get Value
                     {
-                        var builtString = keyValue.ToString();
+                        var builtString = keyString.ToString();
                         if (data.ElementAt(i + 3) == '{')
                         {
-                            skip += 3;//skip all chars up to "{"
+                            localSkip += 3; //We've checked up to i+3, so skip next 3 chars.
 
-                            var arrayReturn = getKeyValueArray(i + 1, data, (depth + 1));
-                            dodgy = arrayReturn.Item3;
-                            if ((dodgy == true))
+                            int nextLevelStartPos = i + 3; //i is for char we've just checked, so pass i+3;
+                            int nextLevelDepth = depth + 1; //pass depth + 1 to next level recursive function.
+
+                            var arrayReturn = getKeyValueArray(nextLevelStartPos, data, nextLevelDepth); //Start Next Level Array Parsing
+
+                            localSkip += arrayReturn.skip;
+
+                            dodgy = arrayReturn.dodgy;
+
+                            if (dodgy) //null char detected in string. Finish current
                             {
-                                if (depth > 0)
+                                if (depth > 0) //Not at root node yet, so lets keep breaking out of this function until we get there.
                                 {
-                                    skipReturn += (arrayReturn.Item2);
-
+                                    skipReturn += (localSkip - 1); //If this doesn't exist, recursively dropping down through the functions will result in 1 char being skipped for each function depth. Not sure why.
                                     break;
                                 }
-                                else
-                                {
-                                    arrayReturn.Item1.arrayName = keyValue.ToString();
-                                    keyValueArray.array.Add(arrayReturn.Item1);
-                                    skip++;
-                                }
                             }
-                            else
-                            {
-                                arrayReturn.Item1.arrayName = keyValue.ToString();
-                                keyValueArray.array.Add(arrayReturn.Item1);
-                            }
-
-                            skip += arrayReturn.Item2;
+                            //If we've reached this point, its either Not Dodgy, or it is Dodgy and we're at the Root Node now.
+                            arrayReturn.array.arrayName = keyString.ToString();
+                            keyValueArray.array.Add(arrayReturn.array);
                         }
                         else
                         {
                             KeyValuePair keyValuePair = new KeyValuePair();
                             keyValuePair.key = builtString;
 
-                            var returned = getValue(i + 1, data);
+                            int valueStartPos = i + 1; //i is for char we've just checked, so pass i+1 to start value parsing on next character.
+
+                            var returned = getValue(valueStartPos, data);
+
                             keyValuePair.value = returned.value;
-
                             keyValueArray.pairs.Add(keyValuePair);
-
-                            skip = returned.charToSkip;
+                            localSkip = returned.charToSkip;
                         }
                         key = false;
                     }
                 }
 
-                if (key) //new key value, but not in value yet.
+                if (key) //Building the Key String
                 {
-                    keyValue.Append(c);
+                    keyString.Append(c);
                     continue;
                 }
             }
