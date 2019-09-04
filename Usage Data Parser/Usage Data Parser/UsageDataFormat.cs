@@ -17,6 +17,7 @@ namespace Usage_Data_Parser
         public Temp temp;
         public MagFlux magFlux;
         public Accel accel;
+        public Error error;
     }
 
     public class HandConfig
@@ -106,5 +107,12 @@ namespace Usage_Data_Parser
     {
         public string max;
         public string duration;
+    }
+
+    public class Error
+    {
+        public string num;
+        public string severity;
+        public string description;
     }
 }

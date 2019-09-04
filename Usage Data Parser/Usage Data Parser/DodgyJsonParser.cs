@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Usage_Data_Parser
@@ -12,7 +13,7 @@ namespace Usage_Data_Parser
         {
             ParsedJSONFile parsedFile = new ParsedJSONFile();
 
-            var decoded = getKeyValueArray(1, data); //1 is so it passes the first character ('"') of the file. This would otherwise cause this function to classify the first field incorrectly.
+            var decoded = getKeyValueArray(1, data, 0); //1 is so it passes the first character ('"') of the file. This would otherwise cause this function to classify the first field incorrectly.
 
             foreach (KeyValuePair pair in decoded.Item1.pairs)
             {
@@ -80,6 +81,12 @@ namespace Usage_Data_Parser
                         }
                         break;
 
+                    case "error":
+                        {
+                            parsedFile = splitError(keyValueArray, parsedFile);
+                        }
+                        break;
+
                     default: break;
                 }
             }
@@ -122,6 +129,37 @@ namespace Usage_Data_Parser
                 }
             }
 
+            return currentFile;
+        }
+
+        public ParsedJSONFile splitError(KeyValueArray array, ParsedJSONFile currentFile)
+        {
+            currentFile.error = new Error();
+            foreach (KeyValuePair pair in array.pairs)
+            {
+                switch (pair.key)
+                {
+                    case "num":
+                        {
+                            currentFile.error.num = pair.value;
+                        }
+                        break;
+
+                    case "severity":
+                        {
+                            currentFile.error.severity = pair.value;
+                        }
+                        break;
+
+                    case "description":
+                        {
+                            currentFile.error.description = pair.value;
+                        }
+                        break;
+
+                    default: break;
+                }
+            }
             return currentFile;
         }
 
@@ -725,11 +763,170 @@ namespace Usage_Data_Parser
             return (value, charToSkip);
         }
 
-        public (KeyValueArray, int) getKeyValueArray(int startingPos, string data) //Recursive function to build nested array of json file.
+        public bool checkUnexpectedKeys(string key, string val)
+        {
+            bool expected = false;
+            switch (key)
+            {
+                case "handConfig":
+                    {
+                        Type t = typeof(WORDS.HANDCONFIG);
+                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                        foreach (System.Reflection.FieldInfo field in fields)
+                        {
+                            if (val == field.GetValue(null).ToString())
+                            {
+                                expected = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "error":
+                    {
+                        Type t = typeof(WORDS.ERROR);
+                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                        foreach (System.Reflection.FieldInfo field in fields)
+                        {
+                            if (val == field.GetValue(null).ToString())
+                            {
+                                expected = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "time":
+                    {
+                        Type t = typeof(WORDS.TIME);
+                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                        foreach (System.Reflection.FieldInfo field in fields)
+                        {
+                            if (val == field.GetValue(null).ToString())
+                            {
+                                expected = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "grip":
+                    {
+                        Type t = typeof(WORDS.GRIP.GROUP.GRIP);
+                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                        foreach (System.Reflection.FieldInfo field in fields)
+                        {
+                            if (val == field.GetValue(null).ToString())
+                            {
+                                expected = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "group":
+                    {
+                        Type t = typeof(WORDS.GRIP.GROUP);
+                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                        foreach (System.Reflection.FieldInfo field in fields)
+                        {
+                            if (val == field.GetValue(null).ToString())
+                            {
+                                expected = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "battery":
+                    {
+                        Type t = typeof(WORDS.BATTERY);
+                        System.Reflection.FieldInfo[] fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                        foreach (System.Reflection.FieldInfo field in fields)
+                        {
+                            if (val == field.GetValue(null).ToString())
+                            {
+                                expected = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "min":
+                    {
+                    }
+                    break;
+
+                case "max":
+                    {
+                    }
+                    break;
+
+                case "battSample":
+                    {
+                    }
+                    break;
+
+                case "temp":
+                    {
+                    }
+                    break;
+
+                case "tempSample":
+                    {
+                    }
+                    break;
+
+                case "magFlux":
+                    {
+                    }
+                    break;
+
+                case "X":
+                    {
+                    }
+                    break;
+
+                case "Y":
+                    {
+                    }
+                    break;
+
+                case "Z":
+                    {
+                    }
+                    break;
+
+                case "accel":
+                    {
+                    }
+                    break;
+
+                default: break;
+            }
+
+            return expected;
+        }
+
+        public (KeyValueArray, int, bool) getKeyValueArray(int startingPos, string data, int depth) //Recursive function to build nested array of json file.
         {
             KeyValueArray keyValueArray = new KeyValueArray();
 
             int skipReturn = 0;
+
+            bool dodgy = false;
 
             int skip = 0;
 
@@ -745,6 +942,12 @@ namespace Usage_Data_Parser
                 {
                     skip--;
                     continue;
+                }
+
+                if (c == '\0') //null character, reached dodgy point in file.
+                {
+                    dodgy = true;
+                    break;
                 }
 
                 if (((c == ':') || c == (' ') || (c == '{') || ((int)c < 0x20)) && (!key))
@@ -773,9 +976,28 @@ namespace Usage_Data_Parser
                         {
                             skip += 3;//skip all chars up to "{"
 
-                            var arrayReturn = getKeyValueArray(i + 1, data);
-                            arrayReturn.Item1.arrayName = keyValue.ToString();
-                            keyValueArray.array.Add(arrayReturn.Item1);
+                            var arrayReturn = getKeyValueArray(i + 1, data, (depth + 1));
+                            dodgy = arrayReturn.Item3;
+                            if ((dodgy == true))
+                            {
+                                if (depth > 0)
+                                {
+                                    skipReturn += (arrayReturn.Item2);
+
+                                    break;
+                                }
+                                else
+                                {
+                                    arrayReturn.Item1.arrayName = keyValue.ToString();
+                                    keyValueArray.array.Add(arrayReturn.Item1);
+                                    skip++;
+                                }
+                            }
+                            else
+                            {
+                                arrayReturn.Item1.arrayName = keyValue.ToString();
+                                keyValueArray.array.Add(arrayReturn.Item1);
+                            }
 
                             skip += arrayReturn.Item2;
                         }
@@ -802,7 +1024,7 @@ namespace Usage_Data_Parser
                 }
             }
 
-            return (keyValueArray, skipReturn);
+            return (keyValueArray, skipReturn, dodgy);
         }
 
         public class KeyValueArray
@@ -817,5 +1039,8 @@ namespace Usage_Data_Parser
             public string key;
             public string value;
         }
+
+        public string[] expectedBatteryWords = { WORDS.BATTERY._MIN, WORDS.BATTERY._MAX, WORDS.BATTERY.BATTSAMPLE._BATTSAMPLE, WORDS.BATTERY.BATTSAMPLE._N, WORDS.BATTERY.BATTSAMPLE._BATTV, WORDS.BATTERY.BATTSAMPLE._DURATION };
+        public string[] expectedTempWords = { WORDS.TEMP._MIN, WORDS.TEMP._MAX, WORDS.TEMP.TEMPSAMPLE._TEMPSAMPLE, WORDS.TEMP.TEMPSAMPLE._N, WORDS.TEMP.TEMPSAMPLE._TEMPC, WORDS.TEMP.TEMPSAMPLE._DURATION };
     }
 }

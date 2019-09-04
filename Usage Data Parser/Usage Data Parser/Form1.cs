@@ -101,10 +101,19 @@ namespace Usage_Data_Parser
                     if ((jsonParsedData.time != null) && (jsonParsedData.resetCause != null))
                     {
                         DataTable dt2 = new DataTable();
-                        DataColumn[] columns2 = { new DataColumn("Session Num"), new DataColumn("Reset Cause"), new DataColumn("On Time"), new DataColumn("Active Time") };
+                        DataColumn[] columns2 = { new DataColumn("Session Num"), new DataColumn("Reset Cause"), new DataColumn("On Time"), new DataColumn("Active Time"), new DataColumn("Error Num"), new DataColumn("Error Severity"), new DataColumn("Error Description") };
                         dt2.Columns.AddRange(columns2);
-                        Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime };
-                        dt2.Rows.Add(row2);
+                        if (jsonParsedData.error != null)
+                        {
+                            Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime, jsonParsedData.error.num, jsonParsedData.error.severity, jsonParsedData.error.description };
+                            dt2.Rows.Add(row2);
+                        }
+                        else
+                        {
+                            Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime, "no data", "no data", "no data" };
+                            dt2.Rows.Add(row2);
+                        }
+
                         dataGridViewSummary.DataSource = dt2;
                     }
 
