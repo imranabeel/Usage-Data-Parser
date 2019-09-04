@@ -1,4 +1,5 @@
 ﻿using MicroJson;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -21,18 +22,37 @@ namespace Usage_Data_Parser
 
         private void folderSelectButton(object sender, EventArgs e)
         {
-            using (var fbd = new FolderBrowserDialog())
+            using (var directoryDialog = new CommonOpenFileDialog
             {
-                DialogResult result = fbd.ShowDialog();
+                IsFolderPicker = true,
+                Title = "Select Folder"
+            })
+            {
+                CommonFileDialogResult result = directoryDialog.ShowDialog();
 
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                if (result == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(directoryDialog.FileName))
                 {
-                    rootNodePath = fbd.SelectedPath;
+                    rootNodePath = directoryDialog.FileName;
                     treeView1.BeginUpdate();
                     ListDirectory(treeView1, rootNodePath);
                     treeView1.EndUpdate();
                 }
             }
+
+            //using (var fbd = new FolderBrowserDialog())
+            //{
+            //    fbd.ShowNewFolderButton = true;
+            //    fbd.Description = "Please select the folder which contains the usage data you want to view:";
+            //    DialogResult result = fbd.ShowDialog();
+
+            //    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+            //    {
+            //        rootNodePath = fbd.SelectedPath;
+            //        treeView1.BeginUpdate();
+            //        ListDirectory(treeView1, rootNodePath);
+            //        treeView1.EndUpdate();
+            //    }
+            //}
         }
 
         private void ListDirectory(TreeView treeView, string path)

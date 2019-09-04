@@ -10,7 +10,7 @@ namespace Usage_Data_Parser
     {
         private static int majorVersion = 1;
         private static int minorVersion = 0;
-        private static int patchNumber = 0;
+        private static int patchNumber = 1;
 
         public static string getVersion()
         {
