@@ -14,6 +14,9 @@ namespace Usage_Data_Parser
             ParsedJSONFile parsedFile = new ParsedJSONFile();
 
             var decoded = getKeyValueArray(1, data, 0); //1 is so it passes the first character ('"') of the file. This would otherwise cause this function to classify the first field incorrectly.
+            parsedFile.dodgyFile = decoded.dodgy;
+
+            int sessionCount = 0;
 
             foreach (KeyValuePair pair in decoded.Item1.pairs)
             {
@@ -41,6 +44,7 @@ namespace Usage_Data_Parser
                 {
                     case "handConfig":
                         {
+                            sessionCount++;
                             parsedFile = splitHandConfig(keyValueArray, parsedFile);
                         }
                         break;
@@ -90,7 +94,7 @@ namespace Usage_Data_Parser
                     default: break;
                 }
             }
-
+            parsedFile.sessions = sessionCount;
             return parsedFile;
         }
 
@@ -725,11 +729,11 @@ namespace Usage_Data_Parser
             return currentFile;
         }
 
-        public (string value, int charToSkip) getValue(int startingPos, string data)
+        public (string value, int charToSkip, bool dodgy) getValue(int startingPos, string data)
         {
             string value = "";
             int charToSkip = 0;
-
+            bool dodgy = false;
             bool valueStarted = false;
 
             var tempString = new StringBuilder();
@@ -739,8 +743,20 @@ namespace Usage_Data_Parser
                 char c = data.ElementAt(i);
                 charToSkip++;
 
-                if (c == '\0')
+                if (c == '\0') //null char.
                 {
+                    dodgy = true;
+                    //check next 20 characters for a tab. This is to iterate over any additional null characters that are occasionally present when the first null char is found.
+                    for (int j = 1; j < 20; j++) //starts at 1, because 0 would result in checking the same char we've just checked
+                    {
+                        int charIndex = i + j;
+                        char tab = data.ElementAt(charIndex);
+                        if (tab == '\t') // check for tab char
+                        {
+                            charToSkip += j; //increment skipReturn value by number of chars we've checked.
+                            break;
+                        }
+                    }
                     break;
                 }
 
@@ -773,10 +789,10 @@ namespace Usage_Data_Parser
                 }
             }
 
-            return (value, charToSkip);
+            return (value, charToSkip, dodgy);
         }
 
-        public (KeyValueArray array, int skip, bool dodgy) getKeyValueArray(int startingPos, string data, int depth)
+        public (KeyValueArray array, int skip, bool recursiveDodgyFlag, bool dodgy) getKeyValueArray(int startingPos, string data, int depth)
         {
             KeyValueArray keyValueArray = new KeyValueArray();
             bool dodgy = false;
@@ -785,6 +801,8 @@ namespace Usage_Data_Parser
 
             int skipReturn = 0;
             int localSkip = 0;
+
+            bool hasBeenDodgy = false;
 
             for (int i = startingPos; i < data.Length; i++)
             {
@@ -847,13 +865,14 @@ namespace Usage_Data_Parser
 
                             localSkip += arrayReturn.skip;
 
-                            dodgy = arrayReturn.dodgy;
+                            dodgy = arrayReturn.recursiveDodgyFlag;
 
                             if (dodgy) //null char detected in string. Finish current
                             {
+                                hasBeenDodgy = true;
                                 if (depth > 0) //Not at root node yet, so lets keep breaking out of this function until we get there.
                                 {
-                                    skipReturn += (localSkip - 1); //If "-1" doesn't exist, recursively dropping down through the functions will result in 1 char being skipped (i.e skipReturn is too large) for each function depth. Not sure why.
+                                    skipReturn += (localSkip - 1); //If "-1" doesn't exist, recursively dropping down through the functions will result in 1 char being skipped (i.e skipReturn is too large) for each function depth.
                                     break;
                                 }
                             }
@@ -870,9 +889,19 @@ namespace Usage_Data_Parser
 
                             var returned = getValue(valueStartPos, data);
 
+                            localSkip += returned.charToSkip;
+
+                            dodgy = returned.dodgy;
+
+                            if (dodgy)
+                            {
+                                hasBeenDodgy = true;
+                                skipReturn += (localSkip - 1); //If "-1" doesn't exist, recursively dropping down through the functions will result in 1 char being skipped (i.e skipReturn is too large) for each function depth.
+                                break;
+                            }
+
                             keyValuePair.value = returned.value;
                             keyValueArray.pairs.Add(keyValuePair);
-                            localSkip = returned.charToSkip;
                         }
                         key = false;
                     }
@@ -885,7 +914,7 @@ namespace Usage_Data_Parser
                 }
             }
 
-            return (keyValueArray, skipReturn, dodgy);
+            return (keyValueArray, skipReturn, dodgy, hasBeenDodgy);
         }
 
         public class KeyValueArray
@@ -900,8 +929,5 @@ namespace Usage_Data_Parser
             public string key;
             public string value;
         }
-
-        public string[] expectedBatteryWords = { WORDS.BATTERY._MIN, WORDS.BATTERY._MAX, WORDS.BATTERY.BATTSAMPLE._BATTSAMPLE, WORDS.BATTERY.BATTSAMPLE._N, WORDS.BATTERY.BATTSAMPLE._BATTV, WORDS.BATTERY.BATTSAMPLE._DURATION };
-        public string[] expectedTempWords = { WORDS.TEMP._MIN, WORDS.TEMP._MAX, WORDS.TEMP.TEMPSAMPLE._TEMPSAMPLE, WORDS.TEMP.TEMPSAMPLE._N, WORDS.TEMP.TEMPSAMPLE._TEMPC, WORDS.TEMP.TEMPSAMPLE._DURATION };
     }
 }

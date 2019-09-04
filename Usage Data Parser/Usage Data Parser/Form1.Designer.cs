@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.button1 = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.dataGridViewHandConfig = new System.Windows.Forms.DataGridView();
@@ -53,6 +54,10 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).BeginInit();
@@ -75,13 +80,15 @@
             this.tabPage4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(6, 19);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(188, 25);
+            this.button1.Size = new System.Drawing.Size(261, 25);
             this.button1.TabIndex = 0;
             this.button1.Text = "Select Usage Data Folder";
             this.button1.UseVisualStyleBackColor = true;
@@ -91,7 +98,7 @@
             // 
             this.treeView1.Location = new System.Drawing.Point(6, 50);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(188, 392);
+            this.treeView1.Size = new System.Drawing.Size(261, 656);
             this.treeView1.TabIndex = 1;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FileFolderSelected);
             // 
@@ -126,7 +133,7 @@
             this.dataGridViewGrips.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewGrips.Name = "dataGridViewGrips";
             this.dataGridViewGrips.ReadOnly = true;
-            this.dataGridViewGrips.Size = new System.Drawing.Size(471, 618);
+            this.dataGridViewGrips.Size = new System.Drawing.Size(471, 740);
             this.dataGridViewGrips.TabIndex = 4;
             // 
             // dataGridViewBattSummary
@@ -148,7 +155,7 @@
             this.dataGridViewBattSamples.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewBattSamples.Name = "dataGridViewBattSamples";
             this.dataGridViewBattSamples.ReadOnly = true;
-            this.dataGridViewBattSamples.Size = new System.Drawing.Size(468, 618);
+            this.dataGridViewBattSamples.Size = new System.Drawing.Size(468, 740);
             this.dataGridViewBattSamples.TabIndex = 6;
             // 
             // dataGridViewTempSamples
@@ -159,7 +166,7 @@
             this.dataGridViewTempSamples.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewTempSamples.Name = "dataGridViewTempSamples";
             this.dataGridViewTempSamples.ReadOnly = true;
-            this.dataGridViewTempSamples.Size = new System.Drawing.Size(468, 618);
+            this.dataGridViewTempSamples.Size = new System.Drawing.Size(468, 741);
             this.dataGridViewTempSamples.TabIndex = 8;
             // 
             // dataGridViewTempSummary
@@ -199,7 +206,7 @@
             // 
             this.button2.Location = new System.Drawing.Point(6, 19);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(188, 28);
+            this.button2.Size = new System.Drawing.Size(261, 28);
             this.button2.TabIndex = 11;
             this.button2.Text = "Export to Excel";
             this.button2.UseVisualStyleBackColor = true;
@@ -211,7 +218,7 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Location = new System.Drawing.Point(230, 12);
+            this.tabControl1.Location = new System.Drawing.Point(294, 94);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(485, 773);
@@ -299,7 +306,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(477, 713);
+            this.tabPage2.Size = new System.Drawing.Size(477, 747);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Grips";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -309,7 +316,7 @@
             this.tabPage3.Controls.Add(this.dataGridViewBattSamples);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(477, 713);
+            this.tabPage3.Size = new System.Drawing.Size(477, 747);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Battery";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -319,7 +326,7 @@
             this.tabPage4.Controls.Add(this.dataGridViewTempSamples);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(477, 713);
+            this.tabPage4.Size = new System.Drawing.Size(477, 747);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Temperature";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -328,9 +335,9 @@
             // 
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.treeView1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
+            this.groupBox1.Location = new System.Drawing.Point(12, 94);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 448);
+            this.groupBox1.Size = new System.Drawing.Size(273, 712);
             this.groupBox1.TabIndex = 13;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "File Selection";
@@ -338,18 +345,57 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.button2);
-            this.groupBox2.Location = new System.Drawing.Point(12, 466);
+            this.groupBox2.Location = new System.Drawing.Point(12, 812);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(200, 55);
+            this.groupBox2.Size = new System.Drawing.Size(273, 55);
             this.groupBox2.TabIndex = 14;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Export";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 16);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(0, 13);
+            this.label1.TabIndex = 15;
+            // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.label2);
+            this.groupBox9.Controls.Add(this.label1);
+            this.groupBox9.Location = new System.Drawing.Point(294, 4);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(485, 80);
+            this.groupBox9.TabIndex = 16;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "File Details";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 50);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(0, 13);
+            this.label2.TabIndex = 16;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.InitialImage")));
+            this.pictureBox1.Location = new System.Drawing.Point(12, 2);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(273, 74);
+            this.pictureBox1.TabIndex = 17;
+            this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(717, 784);
+            this.ClientSize = new System.Drawing.Size(788, 879);
+            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox2);
@@ -377,6 +423,9 @@
             this.tabPage4.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -408,6 +457,10 @@
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

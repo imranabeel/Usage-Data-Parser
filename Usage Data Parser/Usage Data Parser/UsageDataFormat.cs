@@ -18,6 +18,9 @@ namespace Usage_Data_Parser
         public MagFlux magFlux;
         public Accel accel;
         public Error error;
+
+        public bool dodgyFile = false;
+        public int sessions = 0;
     }
 
     public class HandConfig
