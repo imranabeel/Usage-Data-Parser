@@ -16,6 +16,7 @@ namespace Usage_Data_Parser
         public Form1()
         {
             InitializeComponent();
+            label3.Text = "Version: " + Version.getVersion();
         }
 
         private void folderSelectButton(object sender, EventArgs e)

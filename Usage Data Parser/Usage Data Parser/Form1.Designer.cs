@@ -58,6 +58,7 @@
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.label2 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).BeginInit();
@@ -96,9 +97,9 @@
             // 
             // treeView1
             // 
-            this.treeView1.Location = new System.Drawing.Point(6, 50);
+            this.treeView1.Location = new System.Drawing.Point(6, 48);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(261, 656);
+            this.treeView1.Size = new System.Drawing.Size(261, 636);
             this.treeView1.TabIndex = 1;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FileFolderSelected);
             // 
@@ -335,9 +336,9 @@
             // 
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.treeView1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 94);
+            this.groupBox1.Location = new System.Drawing.Point(12, 116);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(273, 712);
+            this.groupBox1.Size = new System.Drawing.Size(273, 690);
             this.groupBox1.TabIndex = 13;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "File Selection";
@@ -389,11 +390,21 @@
             this.pictureBox1.TabIndex = 17;
             this.pictureBox1.TabStop = false;
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(13, 83);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(42, 13);
+            this.label3.TabIndex = 18;
+            this.label3.Text = "Version";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 879);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox1);
@@ -427,6 +438,7 @@
             this.groupBox9.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -461,6 +473,7 @@
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label3;
     }
 }
 
