@@ -410,6 +410,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox2);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
             this.Text = "Usage Data Parser";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).EndInit();

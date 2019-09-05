@@ -274,7 +274,7 @@ namespace Usage_Data_Parser
                 try
                 {
                     worksheet = (Excel.Worksheet)workbook.ActiveSheet;
-                    workbook.Sheets.Add(Count: 4);
+                    workbook.Sheets.Add(Count: 5);
 
                     worksheet = (Excel.Worksheet)workbook.Sheets[1];
 
@@ -425,7 +425,7 @@ namespace Usage_Data_Parser
 
                         if (jsonParsedData.accel != null)
                         {
-                            worksheet = (Excel.Worksheet)workbook.Sheets[6].Select();
+                            worksheet = (Excel.Worksheet)workbook.Sheets[6];//.Select();
                             worksheet.Name = "Acceleration";
 
                             worksheet.Cells[1, 1] = "Axis";

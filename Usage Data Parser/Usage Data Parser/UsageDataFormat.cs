@@ -8,9 +8,9 @@ namespace Usage_Data_Parser
 {
     public class ParsedJSONFile
     {
-        public int sessionN;
+        public int sessionN = 0;
         public HandConfig handConfig;
-        public string resetCause;
+        public string resetCause = "";
         public Time time;
         public GripParent grip;
         public Battery battery;
@@ -25,16 +25,16 @@ namespace Usage_Data_Parser
 
     public class HandConfig
     {
-        public string serialNum;
-        public string fwVer;
-        public string chirality;
-        public string nMotors;
+        public string serialNum = "";
+        public string fwVer = "";
+        public string chirality = "";
+        public string nMotors = "";
     }
 
     public class Time
     {
-        public string onTime;
-        public string activeTime;
+        public string onTime = "";
+        public string activeTime = "";
     }
 
     public class GripParent
@@ -44,78 +44,78 @@ namespace Usage_Data_Parser
 
     public class Group
     {
-        public string n;
-        public string size;
+        public string n = "";
+        public string size = "";
         public List<GripChild> grips = new List<GripChild>();
     }
 
     public class GripChild
     {
-        public string n;
-        public string name;
-        public string gripStr;
-        public string duration;
+        public string n = "";
+        public string name = "";
+        public string gripStr = "";
+        public string duration = "";
     }
 
     public class Battery
     {
-        public BattSample min;
-        public BattSample max;
+        public BattSample min = new BattSample();
+        public BattSample max = new BattSample();
         public List<BattSample> battSamples = new List<BattSample>();
     }
 
     public class BattSample
     {
-        public string n;
-        public string battV;
-        public string duration;
+        public string n = "";
+        public string battV = "";
+        public string duration = "";
     }
 
     public class Temp
     {
-        public TempSample minTemp;
-        public TempSample maxTemp;
+        public TempSample minTemp = new TempSample();
+        public TempSample maxTemp = new TempSample();
         public List<TempSample> tempSamples = new List<TempSample>();
     }
 
     public class TempSample
     {
-        public string n;
-        public string tempC;
-        public string duration;
+        public string n = "";
+        public string tempC = "";
+        public string duration = "";
     }
 
     public class MagFlux
     {
-        public string unit;
-        public MagFluxMeas X;
-        public MagFluxMeas Y;
+        public string unit = "";
+        public MagFluxMeas X = new MagFluxMeas();
+        public MagFluxMeas Y = new MagFluxMeas();
     }
 
     public class MagFluxMeas
     {
-        public string max;
-        public string duration;
+        public string max = "";
+        public string duration = "";
     }
 
     public class Accel
     {
-        public string unit;
-        public AccelMeas X;
-        public AccelMeas Y;
-        public AccelMeas Z;
+        public string unit = "";
+        public AccelMeas X = new AccelMeas();
+        public AccelMeas Y = new AccelMeas();
+        public AccelMeas Z = new AccelMeas();
     }
 
     public class AccelMeas
     {
-        public string max;
-        public string duration;
+        public string max = "";
+        public string duration = "";
     }
 
     public class Error
     {
-        public string num;
-        public string severity;
-        public string description;
+        public string num = "";
+        public string severity = "";
+        public string description = "";
     }
 }
