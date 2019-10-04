@@ -136,6 +136,7 @@
             this.dataGridViewGrips.ReadOnly = true;
             this.dataGridViewGrips.Size = new System.Drawing.Size(471, 740);
             this.dataGridViewGrips.TabIndex = 4;
+            this.dataGridViewGrips.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.dataGridViewGrips_SortCompare);
             // 
             // dataGridViewBattSummary
             // 
@@ -156,8 +157,9 @@
             this.dataGridViewBattSamples.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewBattSamples.Name = "dataGridViewBattSamples";
             this.dataGridViewBattSamples.ReadOnly = true;
-            this.dataGridViewBattSamples.Size = new System.Drawing.Size(468, 740);
+            this.dataGridViewBattSamples.Size = new System.Drawing.Size(471, 740);
             this.dataGridViewBattSamples.TabIndex = 6;
+            this.dataGridViewBattSamples.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.dataGridViewBattery_SortCompare);
             // 
             // dataGridViewTempSamples
             // 
@@ -167,8 +169,9 @@
             this.dataGridViewTempSamples.Location = new System.Drawing.Point(3, 3);
             this.dataGridViewTempSamples.Name = "dataGridViewTempSamples";
             this.dataGridViewTempSamples.ReadOnly = true;
-            this.dataGridViewTempSamples.Size = new System.Drawing.Size(468, 741);
+            this.dataGridViewTempSamples.Size = new System.Drawing.Size(471, 740);
             this.dataGridViewTempSamples.TabIndex = 8;
+            this.dataGridViewTempSamples.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.dataGridViewTemp_SortCompare);
             // 
             // dataGridViewTempSummary
             // 

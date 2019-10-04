@@ -3,6 +3,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -72,9 +73,21 @@ namespace Usage_Data_Parser
             return directoryNode;
         }
 
+        private TreeNode oldNode;
+
         private void FileFolderSelected(object sender, TreeViewEventArgs e)
         {
+            if (oldNode != null)
+            {
+                Font normalFont = new Font(treeView1.Font, FontStyle.Regular);
+                oldNode.NodeFont = normalFont;
+            }
+            Font boldFont = new Font(treeView1.Font, FontStyle.Bold);
+
             var node = treeView1.SelectedNode;
+            node.NodeFont = boldFont;
+            oldNode = node;
+
             var tag = (string)node.Tag;
             string fullPath = tag.ToString();
 
@@ -159,11 +172,12 @@ namespace Usage_Data_Parser
                         DataTable dt3 = new DataTable();
                         DataColumn[] columns3 = { new DataColumn("Grip Group"), new DataColumn("Grip"), new DataColumn("Duration") };
                         dt3.Columns.AddRange(columns3);
+                        dt3.Columns[0].DataType = typeof(int);
                         foreach (Group group in jsonParsedData.grip.gripGroups)
                         {
                             foreach (GripChild grip in group.grips)
                             {
-                                Object[] row3 = { group.n, grip.name, grip.duration };
+                                Object[] row3 = { int.Parse(group.n), grip.name, grip.duration };
                                 dt3.Rows.Add(row3);
                             }
                         }
@@ -184,9 +198,10 @@ namespace Usage_Data_Parser
                         DataTable dt5 = new DataTable();
                         DataColumn[] columns5 = { new DataColumn("n"), new DataColumn("Batt Voltage"), new DataColumn("Duration") };
                         dt5.Columns.AddRange(columns5);
+                        dt5.Columns[0].DataType = typeof(int);
                         foreach (BattSample batt in jsonParsedData.battery.battSamples)
                         {
-                            Object[] row6 = { batt.n, batt.battV, batt.duration };
+                            Object[] row6 = { int.Parse(batt.n), batt.battV, batt.duration };
                             dt5.Rows.Add(row6);
                         }
                         dataGridViewBattSamples.DataSource = dt5;
@@ -206,9 +221,10 @@ namespace Usage_Data_Parser
                         DataTable dt7 = new DataTable();
                         DataColumn[] columns7 = { new DataColumn("n"), new DataColumn("Temp (Celcius)"), new DataColumn("Duration") };
                         dt7.Columns.AddRange(columns7);
+                        dt7.Columns[0].DataType = typeof(int);
                         foreach (TempSample temp in jsonParsedData.temp.tempSamples)
                         {
-                            Object[] row9 = { temp.n, temp.tempC, temp.duration };
+                            Object[] row9 = { int.Parse(temp.n), temp.tempC, temp.duration };
                             dt7.Rows.Add(row9);
                         }
                         dataGridViewTempSamples.DataSource = dt7;
@@ -240,6 +256,36 @@ namespace Usage_Data_Parser
                         dataGridViewAccel.DataSource = dt9;
                     }
                 }
+            }
+        }
+
+        private void dataGridViewGrips_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            //Suppose your interested column has index 1
+            if (e.Column.Index == 0)
+            {
+                e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString()));
+                e.Handled = true;//pass by the default sorting
+            }
+        }
+
+        private void dataGridViewTemp_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            //Suppose your interested column has index 1
+            if (e.Column.Index == 0)
+            {
+                e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString()));
+                e.Handled = true;//pass by the default sorting
+            }
+        }
+
+        private void dataGridViewBattery_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        {
+            //Suppose your interested column has index 1
+            if (e.Column.Index == 0)
+            {
+                e.SortResult = int.Parse(e.CellValue1.ToString()).CompareTo(int.Parse(e.CellValue2.ToString()));
+                e.Handled = true;//pass by the default sorting
             }
         }
 
