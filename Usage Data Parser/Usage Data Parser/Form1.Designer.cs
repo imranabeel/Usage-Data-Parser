@@ -58,7 +58,7 @@
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.label2 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.versionText = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).BeginInit();
@@ -421,21 +421,21 @@
             this.pictureBox1.TabIndex = 17;
             this.pictureBox1.TabStop = false;
             // 
-            // label3
+            // versionText
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 83);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(42, 13);
-            this.label3.TabIndex = 18;
-            this.label3.Text = "Version";
+            this.versionText.AutoSize = true;
+            this.versionText.Location = new System.Drawing.Point(13, 83);
+            this.versionText.Name = "versionText";
+            this.versionText.Size = new System.Drawing.Size(42, 13);
+            this.versionText.TabIndex = 18;
+            this.versionText.Text = "Version";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 879);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.versionText);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox1);
@@ -504,7 +504,7 @@
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label versionText;
     }
 }
 
