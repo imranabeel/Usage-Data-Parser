@@ -107,6 +107,8 @@
             // 
             this.dataGridViewHandConfig.AllowUserToAddRows = false;
             this.dataGridViewHandConfig.AllowUserToDeleteRows = false;
+            this.dataGridViewHandConfig.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewHandConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewHandConfig.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridViewHandConfig.Location = new System.Drawing.Point(5, 19);
@@ -119,6 +121,8 @@
             // 
             this.dataGridViewSummary.AllowUserToAddRows = false;
             this.dataGridViewSummary.AllowUserToDeleteRows = false;
+            this.dataGridViewSummary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewSummary.Location = new System.Drawing.Point(4, 19);
             this.dataGridViewSummary.Name = "dataGridViewSummary";
@@ -142,6 +146,8 @@
             // 
             this.dataGridViewBattSummary.AllowUserToAddRows = false;
             this.dataGridViewBattSummary.AllowUserToDeleteRows = false;
+            this.dataGridViewBattSummary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewBattSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewBattSummary.Location = new System.Drawing.Point(5, 19);
             this.dataGridViewBattSummary.Name = "dataGridViewBattSummary";
@@ -177,6 +183,8 @@
             // 
             this.dataGridViewTempSummary.AllowUserToAddRows = false;
             this.dataGridViewTempSummary.AllowUserToDeleteRows = false;
+            this.dataGridViewTempSummary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewTempSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewTempSummary.Location = new System.Drawing.Point(5, 19);
             this.dataGridViewTempSummary.Name = "dataGridViewTempSummary";
@@ -188,6 +196,8 @@
             // 
             this.dataGridViewMagFlux.AllowUserToAddRows = false;
             this.dataGridViewMagFlux.AllowUserToDeleteRows = false;
+            this.dataGridViewMagFlux.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewMagFlux.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewMagFlux.Location = new System.Drawing.Point(3, 16);
             this.dataGridViewMagFlux.Name = "dataGridViewMagFlux";
@@ -199,6 +209,8 @@
             // 
             this.dataGridViewAccel.AllowUserToAddRows = false;
             this.dataGridViewAccel.AllowUserToDeleteRows = false;
+            this.dataGridViewAccel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewAccel.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewAccel.Location = new System.Drawing.Point(6, 19);
             this.dataGridViewAccel.Name = "dataGridViewAccel";
@@ -218,6 +230,8 @@
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
@@ -246,6 +260,8 @@
             // 
             // groupBox8
             // 
+            this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox8.Controls.Add(this.dataGridViewAccel);
             this.groupBox8.Location = new System.Drawing.Point(7, 615);
             this.groupBox8.Name = "groupBox8";
@@ -256,6 +272,8 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox7.Controls.Add(this.dataGridViewMagFlux);
             this.groupBox7.Location = new System.Drawing.Point(7, 484);
             this.groupBox7.Name = "groupBox7";
@@ -266,6 +284,8 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.Controls.Add(this.dataGridViewTempSummary);
             this.groupBox6.Location = new System.Drawing.Point(7, 350);
             this.groupBox6.Name = "groupBox6";
@@ -276,6 +296,8 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.dataGridViewBattSummary);
             this.groupBox5.Location = new System.Drawing.Point(7, 219);
             this.groupBox5.Name = "groupBox5";
@@ -286,6 +308,8 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.dataGridViewSummary);
             this.groupBox4.Location = new System.Drawing.Point(6, 97);
             this.groupBox4.Name = "groupBox4";
@@ -296,6 +320,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.dataGridViewHandConfig);
             this.groupBox3.Location = new System.Drawing.Point(6, 6);
             this.groupBox3.Name = "groupBox3";
@@ -366,6 +392,8 @@
             // 
             // groupBox9
             // 
+            this.groupBox9.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox9.Controls.Add(this.label2);
             this.groupBox9.Controls.Add(this.label1);
             this.groupBox9.Location = new System.Drawing.Point(294, 4);
@@ -413,7 +441,6 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox2);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
             this.Text = "Usage Data Parser";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).EndInit();
