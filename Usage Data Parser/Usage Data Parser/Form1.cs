@@ -543,7 +543,7 @@ namespace Usage_Data_Parser
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            versionText.Text = "Version: " + Version.getVersion();
+            this.Text += " v" + Version.getVersion();
 
             string lastOpenedUsageDataPath = Properties.Settings.Default.usageDataPath;
 
