@@ -264,12 +264,19 @@ namespace Usage_Data_Parser
             {
                 label1.Text = "Folder selected";
                 List<TreeNode> childNodes = node.GetAllTreeNodes();
+                List<TreeNode> childDataFiles = new List<TreeNode>();
+
+                foreach (TreeNode childNode in childNodes)
+                {
+                    bool isDataFile = childNode.Tag.ToString().Contains("_DAT");
+                    if (isDataFile)
+                    {
+                        childDataFiles.Add(childNode);
+                        Console.WriteLine(childNode.Tag);
+                    }
+                }
 
                 label1.Text += " with " + childNodes.Count + " children";
-                foreach (TreeNode subNode in childNodes)
-                {
-                    Console.WriteLine(subNode.Text);
-                }
             }
         }
 
@@ -551,8 +558,11 @@ namespace Usage_Data_Parser
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Properties.Settings.Default.usageDataPath = rootNodePath;
-            Properties.Settings.Default.Save();
+            if (rootNodePath != "" & rootNodePath != null)
+            {
+                Properties.Settings.Default.usageDataPath = rootNodePath;
+                Properties.Settings.Default.Save();
+            }
         }
     }
 
