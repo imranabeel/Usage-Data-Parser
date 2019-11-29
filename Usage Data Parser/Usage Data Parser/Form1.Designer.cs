@@ -443,6 +443,8 @@
             this.Controls.Add(this.groupBox2);
             this.Name = "Form1";
             this.Text = "Usage Data Parser";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).EndInit();

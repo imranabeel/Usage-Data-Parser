@@ -20,7 +20,6 @@ namespace Usage_Data_Parser
         public Form1()
         {
             InitializeComponent();
-            versionText.Text = "Version: " + Version.getVersion();
         }
 
         private void folderSelectButton(object sender, EventArgs e)
@@ -533,6 +532,27 @@ namespace Usage_Data_Parser
                     excel = null;
                 }
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            versionText.Text = "Version: " + Version.getVersion();
+
+            string lastOpenedUsageDataPath = Properties.Settings.Default.usageDataPath;
+
+            if (lastOpenedUsageDataPath != null && lastOpenedUsageDataPath != "")
+            {
+                treeView1.BeginUpdate();
+                ListDirectory(treeView1, lastOpenedUsageDataPath);
+                treeView1.EndUpdate();
+            }
+
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.usageDataPath = rootNodePath;
+            Properties.Settings.Default.Save();
         }
     }
 
