@@ -97,170 +97,19 @@ namespace Usage_Data_Parser
             // get the file attributes for file or directory
             FileAttributes attr = File.GetAttributes(fullPath);
 
-            if (!attr.HasFlag(FileAttributes.Directory)) // is a file
+            // If the user selects a file
+            if (!attr.HasFlag(FileAttributes.Directory))
             {
-                ParsedJSONFile jsonParsedData;
-
-                string jsonInputData = File.ReadAllText(fullPath);
-                try
-                {
-                    jsonParsedData = new JsonSerializer().Deserialize<ParsedJSONFile>(jsonInputData);
-                }
-                catch (ParserException ex)
-                {
-                    DodgyJsonParser dodgyJsonParser = new DodgyJsonParser();
-                    jsonParsedData = dodgyJsonParser.parseDodgyFile(jsonInputData);
-                }
-
-                label1.Text = node.FullPath;
-                if (jsonParsedData.sessions > 1)
-                {
-                    label2.Text = "Multiple Sessions detected in this file. Please check file manually";
-                    label2.Font = new System.Drawing.Font(label2.Font, System.Drawing.FontStyle.Bold);
-                }
-                else if (jsonParsedData.dodgyFile)
-                {
-                    label2.Text = "Null Character Detected in File. This file may need checking manually as well.";
-                    label2.Font = new System.Drawing.Font(label2.Font, System.Drawing.FontStyle.Regular);
-                }
-                else
-                {
-                    label2.Text = "";
-                }
-
-                dataGridViewHandConfig.Columns.Clear();
-                dataGridViewSummary.Columns.Clear();
-                dataGridViewGrips.Columns.Clear();
-                dataGridViewBattSummary.Columns.Clear();
-                dataGridViewBattSamples.Columns.Clear();
-                dataGridViewTempSummary.Columns.Clear();
-                dataGridViewTempSamples.Columns.Clear();
-                dataGridViewMagFlux.Columns.Clear();
-                dataGridViewAccel.Columns.Clear();
-
-                DataTable dt = new DataTable();
-
+                // Attempt to parse the file.
+                ParsedJSONFile jsonParsedData = ParseUsageDataFile(node, fullPath);
+                ClearDataGrids();
+                // If the file was parsed, display it.
                 if (jsonParsedData != null)
                 {
-                    if (jsonParsedData.handConfig != null)
-                    {
-                        DataColumn[] columns = { new DataColumn("Serial Num"), new DataColumn("Firmware Version"), new DataColumn("Chirality"), new DataColumn("nMotors") };
-                        dt.Columns.AddRange(columns);
-                        Object[] row = { jsonParsedData.handConfig.serialNum, jsonParsedData.handConfig.fwVer, jsonParsedData.handConfig.chirality, jsonParsedData.handConfig.nMotors };
-                        dt.Rows.Add(row);
-                        dataGridViewHandConfig.DataSource = dt;
-                    }
-
-                    if ((jsonParsedData.time != null) && (jsonParsedData.resetCause != null))
-                    {
-                        DataTable dt2 = new DataTable();
-                        DataColumn[] columns2 = { new DataColumn("Session Num"), new DataColumn("Reset Cause"), new DataColumn("On Time"), new DataColumn("Active Time"), new DataColumn("Error Num"), new DataColumn("Error Severity"), new DataColumn("Error Description") };
-                        dt2.Columns.AddRange(columns2);
-                        if (jsonParsedData.error != null)
-                        {
-                            Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime, jsonParsedData.error.num, jsonParsedData.error.severity, jsonParsedData.error.description };
-                            dt2.Rows.Add(row2);
-                        }
-                        else
-                        {
-                            Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime, "no data", "no data", "no data" };
-                            dt2.Rows.Add(row2);
-                        }
-
-                        dataGridViewSummary.DataSource = dt2;
-                    }
-
-                    if (jsonParsedData.grip != null)
-                    {
-                        DataTable dt3 = new DataTable();
-                        DataColumn[] columns3 = { new DataColumn("Grip Group"), new DataColumn("Grip"), new DataColumn("Duration") };
-                        dt3.Columns.AddRange(columns3);
-                        dt3.Columns[0].DataType = typeof(int);
-                        foreach (Group group in jsonParsedData.grip.gripGroups)
-                        {
-                            foreach (GripChild grip in group.grips)
-                            {
-                                Object[] row3 = { int.Parse(group.n), grip.name, grip.duration };
-                                dt3.Rows.Add(row3);
-                            }
-                        }
-                        dataGridViewGrips.DataSource = dt3;
-                    }
-
-                    if (jsonParsedData.battery != null)
-                    {
-                        DataTable dt4 = new DataTable();
-                        DataColumn[] columns4 = { new DataColumn("Type"), new DataColumn("n"), new DataColumn("Batt Voltage"), new DataColumn("Duration") };
-                        dt4.Columns.AddRange(columns4);
-                        Object[] row4 = { "Min", jsonParsedData.battery.min.n, jsonParsedData.battery.min.battV, jsonParsedData.battery.min.duration };
-                        dt4.Rows.Add(row4);
-                        Object[] row5 = { "Max", jsonParsedData.battery.max.n, jsonParsedData.battery.max.battV, jsonParsedData.battery.max.duration };
-                        dt4.Rows.Add(row5);
-                        dataGridViewBattSummary.DataSource = dt4;
-
-                        DataTable dt5 = new DataTable();
-                        DataColumn[] columns5 = { new DataColumn("n"), new DataColumn("Batt Voltage"), new DataColumn("Duration") };
-                        dt5.Columns.AddRange(columns5);
-                        dt5.Columns[0].DataType = typeof(int);
-                        foreach (BattSample batt in jsonParsedData.battery.battSamples)
-                        {
-                            Object[] row6 = { int.Parse(batt.n), batt.battV, batt.duration };
-                            dt5.Rows.Add(row6);
-                        }
-                        dataGridViewBattSamples.DataSource = dt5;
-                    }
-
-                    if (jsonParsedData.temp != null)
-                    {
-                        DataTable dt6 = new DataTable();
-                        DataColumn[] columns6 = { new DataColumn("Type"), new DataColumn("n"), new DataColumn("Temp (Celcius)"), new DataColumn("Duration") };
-                        dt6.Columns.AddRange(columns6);
-                        Object[] row7 = { "Min", jsonParsedData.temp.minTemp.n, jsonParsedData.temp.minTemp.tempC, jsonParsedData.temp.minTemp.duration };
-                        dt6.Rows.Add(row7);
-                        Object[] row8 = { "Max", jsonParsedData.temp.maxTemp.n, jsonParsedData.temp.maxTemp.tempC, jsonParsedData.temp.maxTemp.tempC };
-                        dt6.Rows.Add(row8);
-                        dataGridViewTempSummary.DataSource = dt6;
-
-                        DataTable dt7 = new DataTable();
-                        DataColumn[] columns7 = { new DataColumn("n"), new DataColumn("Temp (Celcius)"), new DataColumn("Duration") };
-                        dt7.Columns.AddRange(columns7);
-                        dt7.Columns[0].DataType = typeof(int);
-                        foreach (TempSample temp in jsonParsedData.temp.tempSamples)
-                        {
-                            Object[] row9 = { int.Parse(temp.n), temp.tempC, temp.duration };
-                            dt7.Rows.Add(row9);
-                        }
-                        dataGridViewTempSamples.DataSource = dt7;
-                    }
-
-                    if (jsonParsedData.magFlux != null)
-                    {
-                        DataTable dt8 = new DataTable();
-                        DataColumn[] columns8 = { new DataColumn("Axis"), new DataColumn("Max"), new DataColumn("Units"), new DataColumn("Duration") };
-                        dt8.Columns.AddRange(columns8);
-                        Object[] row10 = { "X", jsonParsedData.magFlux.X.max, jsonParsedData.magFlux.unit, jsonParsedData.magFlux.X.duration };
-                        Object[] row11 = { "Y", jsonParsedData.magFlux.Y.max, jsonParsedData.magFlux.unit, jsonParsedData.magFlux.Y.duration };
-                        dt8.Rows.Add(row10);
-                        dt8.Rows.Add(row11);
-                        dataGridViewMagFlux.DataSource = dt8;
-                    }
-
-                    if (jsonParsedData.accel != null)
-                    {
-                        DataTable dt9 = new DataTable();
-                        DataColumn[] columns9 = { new DataColumn("Axis"), new DataColumn("Max"), new DataColumn("Units"), new DataColumn("Duration") };
-                        dt9.Columns.AddRange(columns9);
-                        Object[] row12 = { "X", jsonParsedData.accel.X.max, jsonParsedData.accel.unit, jsonParsedData.accel.X.duration };
-                        Object[] row13 = { "Y", jsonParsedData.accel.Y.max, jsonParsedData.accel.unit, jsonParsedData.accel.Y.duration };
-                        Object[] row14 = { "Z", jsonParsedData.accel.Z.max, jsonParsedData.accel.unit, jsonParsedData.accel.Z.duration };
-                        dt9.Rows.Add(row12);
-                        dt9.Rows.Add(row13);
-                        dt9.Rows.Add(row14);
-                        dataGridViewAccel.DataSource = dt9;
-                    }
+                    DisplayParsedJSON(jsonParsedData);
                 }
             }
-            else
+            else // If the user selects a folder
             {
                 label1.Text = "Folder selected";
                 List<TreeNode> childNodes = node.GetAllTreeNodes();
@@ -272,12 +121,178 @@ namespace Usage_Data_Parser
                     if (isDataFile)
                     {
                         childDataFiles.Add(childNode);
-                        Console.WriteLine(childNode.Tag);
                     }
                 }
-
-                label1.Text += " with " + childNodes.Count + " children";
             }
+        }
+
+        private void DisplayParsedJSON(ParsedJSONFile jsonParsedData)
+        {
+            DataTable dt = new DataTable();
+            if (jsonParsedData.handConfig != null)
+            {
+                DataColumn[] columns = { new DataColumn("Serial Num"), new DataColumn("Firmware Version"), new DataColumn("Chirality"), new DataColumn("nMotors") };
+                dt.Columns.AddRange(columns);
+                Object[] row = { jsonParsedData.handConfig.serialNum, jsonParsedData.handConfig.fwVer, jsonParsedData.handConfig.chirality, jsonParsedData.handConfig.nMotors };
+                dt.Rows.Add(row);
+                dataGridViewHandConfig.DataSource = dt;
+            }
+
+            if ((jsonParsedData.time != null) && (jsonParsedData.resetCause != null))
+            {
+                DataTable dt2 = new DataTable();
+                DataColumn[] columns2 = { new DataColumn("Session Num"), new DataColumn("Reset Cause"), new DataColumn("On Time"), new DataColumn("Active Time"), new DataColumn("Error Num"), new DataColumn("Error Severity"), new DataColumn("Error Description") };
+                dt2.Columns.AddRange(columns2);
+                if (jsonParsedData.error != null)
+                {
+                    Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime, jsonParsedData.error.num, jsonParsedData.error.severity, jsonParsedData.error.description };
+                    dt2.Rows.Add(row2);
+                }
+                else
+                {
+                    Object[] row2 = { jsonParsedData.sessionN, jsonParsedData.resetCause, jsonParsedData.time.onTime, jsonParsedData.time.activeTime, "no data", "no data", "no data" };
+                    dt2.Rows.Add(row2);
+                }
+
+                dataGridViewSummary.DataSource = dt2;
+            }
+
+            if (jsonParsedData.grip != null)
+            {
+                DataTable dt3 = new DataTable();
+                DataColumn[] columns3 = { new DataColumn("Grip Group"), new DataColumn("Grip"), new DataColumn("Duration") };
+                dt3.Columns.AddRange(columns3);
+                dt3.Columns[0].DataType = typeof(int);
+                foreach (Group group in jsonParsedData.grip.gripGroups)
+                {
+                    foreach (GripChild grip in group.grips)
+                    {
+                        Object[] row3 = { int.Parse(group.n), grip.name, grip.duration };
+                        dt3.Rows.Add(row3);
+                    }
+                }
+                dataGridViewGrips.DataSource = dt3;
+            }
+
+            if (jsonParsedData.battery != null)
+            {
+                DataTable dt4 = new DataTable();
+                DataColumn[] columns4 = { new DataColumn("Type"), new DataColumn("n"), new DataColumn("Batt Voltage"), new DataColumn("Duration") };
+                dt4.Columns.AddRange(columns4);
+                Object[] row4 = { "Min", jsonParsedData.battery.min.n, jsonParsedData.battery.min.battV, jsonParsedData.battery.min.duration };
+                dt4.Rows.Add(row4);
+                Object[] row5 = { "Max", jsonParsedData.battery.max.n, jsonParsedData.battery.max.battV, jsonParsedData.battery.max.duration };
+                dt4.Rows.Add(row5);
+                dataGridViewBattSummary.DataSource = dt4;
+
+                DataTable dt5 = new DataTable();
+                DataColumn[] columns5 = { new DataColumn("n"), new DataColumn("Batt Voltage"), new DataColumn("Duration") };
+                dt5.Columns.AddRange(columns5);
+                dt5.Columns[0].DataType = typeof(int);
+                foreach (BattSample batt in jsonParsedData.battery.battSamples)
+                {
+                    Object[] row6 = { int.Parse(batt.n), batt.battV, batt.duration };
+                    dt5.Rows.Add(row6);
+                }
+                dataGridViewBattSamples.DataSource = dt5;
+            }
+
+            if (jsonParsedData.temp != null)
+            {
+                DataTable dt6 = new DataTable();
+                DataColumn[] columns6 = { new DataColumn("Type"), new DataColumn("n"), new DataColumn("Temp (Celcius)"), new DataColumn("Duration") };
+                dt6.Columns.AddRange(columns6);
+                Object[] row7 = { "Min", jsonParsedData.temp.minTemp.n, jsonParsedData.temp.minTemp.tempC, jsonParsedData.temp.minTemp.duration };
+                dt6.Rows.Add(row7);
+                Object[] row8 = { "Max", jsonParsedData.temp.maxTemp.n, jsonParsedData.temp.maxTemp.tempC, jsonParsedData.temp.maxTemp.tempC };
+                dt6.Rows.Add(row8);
+                dataGridViewTempSummary.DataSource = dt6;
+
+                DataTable dt7 = new DataTable();
+                DataColumn[] columns7 = { new DataColumn("n"), new DataColumn("Temp (Celcius)"), new DataColumn("Duration") };
+                dt7.Columns.AddRange(columns7);
+                dt7.Columns[0].DataType = typeof(int);
+                foreach (TempSample temp in jsonParsedData.temp.tempSamples)
+                {
+                    Object[] row9 = { int.Parse(temp.n), temp.tempC, temp.duration };
+                    dt7.Rows.Add(row9);
+                }
+                dataGridViewTempSamples.DataSource = dt7;
+            }
+
+            if (jsonParsedData.magFlux != null)
+            {
+                DataTable dt8 = new DataTable();
+                DataColumn[] columns8 = { new DataColumn("Axis"), new DataColumn("Max"), new DataColumn("Units"), new DataColumn("Duration") };
+                dt8.Columns.AddRange(columns8);
+                Object[] row10 = { "X", jsonParsedData.magFlux.X.max, jsonParsedData.magFlux.unit, jsonParsedData.magFlux.X.duration };
+                Object[] row11 = { "Y", jsonParsedData.magFlux.Y.max, jsonParsedData.magFlux.unit, jsonParsedData.magFlux.Y.duration };
+                dt8.Rows.Add(row10);
+                dt8.Rows.Add(row11);
+                dataGridViewMagFlux.DataSource = dt8;
+            }
+
+            if (jsonParsedData.accel != null)
+            {
+                DataTable dt9 = new DataTable();
+                DataColumn[] columns9 = { new DataColumn("Axis"), new DataColumn("Max"), new DataColumn("Units"), new DataColumn("Duration") };
+                dt9.Columns.AddRange(columns9);
+                Object[] row12 = { "X", jsonParsedData.accel.X.max, jsonParsedData.accel.unit, jsonParsedData.accel.X.duration };
+                Object[] row13 = { "Y", jsonParsedData.accel.Y.max, jsonParsedData.accel.unit, jsonParsedData.accel.Y.duration };
+                Object[] row14 = { "Z", jsonParsedData.accel.Z.max, jsonParsedData.accel.unit, jsonParsedData.accel.Z.duration };
+                dt9.Rows.Add(row12);
+                dt9.Rows.Add(row13);
+                dt9.Rows.Add(row14);
+                dataGridViewAccel.DataSource = dt9;
+            }
+        }
+
+        private void ClearDataGrids()
+        {
+            dataGridViewHandConfig.Columns.Clear();
+            dataGridViewSummary.Columns.Clear();
+            dataGridViewGrips.Columns.Clear();
+            dataGridViewBattSummary.Columns.Clear();
+            dataGridViewBattSamples.Columns.Clear();
+            dataGridViewTempSummary.Columns.Clear();
+            dataGridViewTempSamples.Columns.Clear();
+            dataGridViewMagFlux.Columns.Clear();
+            dataGridViewAccel.Columns.Clear();
+        }
+
+        private ParsedJSONFile ParseUsageDataFile(TreeNode node, string fullPath)
+        {
+            ParsedJSONFile _jsonParsedData;
+
+            string jsonInputData = File.ReadAllText(fullPath);
+            try
+            {
+                _jsonParsedData = new JsonSerializer().Deserialize<ParsedJSONFile>(jsonInputData);
+            }
+            catch (ParserException ex)
+            {
+                DodgyJsonParser dodgyJsonParser = new DodgyJsonParser();
+                _jsonParsedData = dodgyJsonParser.parseDodgyFile(jsonInputData);
+            }
+
+            label1.Text = node.FullPath;
+            if (_jsonParsedData.sessions > 1)
+            {
+                label2.Text = "Multiple Sessions detected in this file. Please check file manually";
+                label2.Font = new System.Drawing.Font(label2.Font, System.Drawing.FontStyle.Bold);
+            }
+            else if (_jsonParsedData.dodgyFile)
+            {
+                label2.Text = "Null Character Detected in File. This file may need checking manually as well.";
+                label2.Font = new System.Drawing.Font(label2.Font, System.Drawing.FontStyle.Regular);
+            }
+            else
+            {
+                label2.Text = "";
+            }
+
+            return _jsonParsedData;
+
         }
 
         private void dataGridViewGrips_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
