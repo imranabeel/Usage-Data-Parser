@@ -15,6 +15,7 @@ namespace Usage_Data_Parser
     public partial class Form1 : Form
     {
         private List<ParsedJSONFile> parsedFiles = new List<ParsedJSONFile>();
+        List<TreeNode> selectedDataFiles = new List<TreeNode>();
         private string rootNodePath = "";
 
         public Form1()
@@ -78,6 +79,7 @@ namespace Usage_Data_Parser
 
         private void FileFolderSelected(object sender, TreeViewEventArgs e)
         {
+            ClearDataGrids();
             label1.Text = "";
             label2.Text = "";
             if (oldNode != null)
@@ -113,17 +115,37 @@ namespace Usage_Data_Parser
             {
                 label1.Text = "Folder selected";
                 List<TreeNode> childNodes = node.GetAllTreeNodes();
-                List<TreeNode> childDataFiles = new List<TreeNode>();
 
+                selectedDataFiles.Clear();
                 foreach (TreeNode childNode in childNodes)
                 {
                     bool isDataFile = childNode.Tag.ToString().Contains("_DAT");
                     if (isDataFile)
                     {
-                        childDataFiles.Add(childNode);
+                        selectedDataFiles.Add(childNode);
                     }
                 }
+
+                int numberOfSelectedDataFiles = selectedDataFiles.Count;
+                label1.Text += " contains " + numberOfSelectedDataFiles.ToString() + " data file";
+                if (numberOfSelectedDataFiles > 1)
+                {
+                    label1.Text += "s";
+                }
+
+
+
             }
+        }
+
+        private void DisplaySummarisedData(int numberOfSessions, string averageOnTime, string averageActiveTime, string totalOnTime, string totalActiveTime, string mTraveled)
+        {
+            DataTable dt2 = new DataTable();
+            DataColumn[] columns2 = { new DataColumn("Number of Sessions"), new DataColumn("Average On Time"), new DataColumn("Average Active Time"), new DataColumn("Total On Time"), new DataColumn("Total Active Time"), new DataColumn("Total m Traveled") };
+            dt2.Columns.AddRange(columns2);
+            Object[] row2 = { numberOfSessions, averageOnTime, averageActiveTime, totalOnTime, totalActiveTime, mTraveled };
+            dt2.Rows.Add(row2);
+            dataGridViewSummary.DataSource = dt2;
         }
 
         private void DisplayParsedJSON(ParsedJSONFile jsonParsedData)
@@ -578,6 +600,112 @@ namespace Usage_Data_Parser
                 Properties.Settings.Default.usageDataPath = rootNodePath;
                 Properties.Settings.Default.Save();
             }
+        }
+
+        private void summariseSelectedDataButton_Click(object sender, EventArgs e)
+        {
+            int numberOfSelectedDataFiles = selectedDataFiles.Count;
+            Console.WriteLine(numberOfSelectedDataFiles);
+            if (numberOfSelectedDataFiles > 0)
+            {
+                Console.WriteLine("Summarising data");
+                ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfSelectedDataFiles];
+
+                for (int i = 0; i < numberOfSelectedDataFiles; i++)
+                {
+
+                    TreeNode _node = selectedDataFiles[i];
+                    string _fullpath = _node.Tag.ToString();
+                    jsonParsedDataFiles[i] = ParseUsageDataFile(_node, _fullpath);
+
+                }
+                int[] averageActiveTime = new int[] { 0, 0, 0, 0 };
+                int[] averageOnTime = new int[] { 0, 0, 0, 0 };
+                int[] totalActiveTime = new int[] { 0, 0, 0, 0 };
+                int[] totalOnTime = new int[] { 0, 0, 0, 0 };
+                int count = 0;
+                foreach (ParsedJSONFile file in jsonParsedDataFiles)
+                {
+                    if (file != null)
+                    {
+                        int[] sessionActiveTime = ParseStringToDuration(file.time.activeTime);
+                        int[] sesssionOnTime = ParseStringToDuration(file.time.onTime);
+                        if (sessionActiveTime[3] >= 0)
+                        {
+                            for (int i = 0; i < sessionActiveTime.Length; i++)
+                            {
+                                totalActiveTime[i] += sessionActiveTime[i];
+                                totalOnTime[i] += sesssionOnTime[i];
+
+                            }
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("file is null");
+                    }
+                }
+                if (count > 0)
+                {
+                    for (int i = 0; i < averageActiveTime.Length; i++)
+                    {
+                        averageActiveTime[i] = totalActiveTime[i] / count;
+                        averageOnTime[i] = totalOnTime[i] / count;
+                    }
+                }
+
+                string averageActiveTimeString = ParseDurationToString(averageActiveTime);
+                string averageOnTimeString = ParseDurationToString(averageOnTime);
+                string totalActiveTimeString = ParseDurationToString(totalActiveTime);
+                string totalOnTimeString = ParseDurationToString(totalOnTime);
+                string total_m_traveled = (
+                    (float)(totalActiveTime[0] * 86400f + 
+                    (float)totalActiveTime[1] * 3600f + 
+                    (float)totalActiveTime[2] * 60f + 
+                    (float)totalActiveTime[3]) * 
+                    23f / 1000f).ToString(); //23 mm per second at no load.
+
+                DisplaySummarisedData(count, averageOnTimeString, averageActiveTimeString, totalOnTimeString, totalActiveTimeString, total_m_traveled);
+            }
+        }
+
+        private string ParseDurationToString(int[] duration) // This is not quite right. Number of Sessions * average != total. 
+        {
+            int seconds = duration[3];
+            int remainingSeconds = seconds % 60;
+            int extraMinutes = seconds / 60;
+
+            int minutes = duration[2] + extraMinutes;
+            int remainingMinutes = minutes % 60;
+            int extraHours = minutes / 60;
+
+            int hours = duration[1] + extraHours;
+            int remainingHours = hours % 24;
+            int extraDays = hours / 24;
+
+            int days = duration[0] + extraDays;
+
+            string result = days.ToString("00") + ":";
+            result += remainingHours.ToString("00") + ":";
+            result += remainingMinutes.ToString("00") + ":";
+            result += remainingSeconds.ToString("00");
+            return result;
+        }
+
+        private int[] ParseStringToDuration(string activeTimeString)
+        {
+            if (activeTimeString != null) // && activeTimeString.Length == 12
+            {
+                int days = Int32.Parse(activeTimeString.Substring(0, 2));
+                int hours = Int32.Parse(activeTimeString.Substring(3, 2));
+                int minutes = Int32.Parse(activeTimeString.Substring(6, 2));
+                int seconds = Int32.Parse(activeTimeString.Substring(9, 2));
+
+                int[] activeTimeFloat = new int[] { days, hours, minutes, seconds };
+                return activeTimeFloat;
+            }
+            return new int[] { -1, -1, -1, -1, };
         }
     }
 

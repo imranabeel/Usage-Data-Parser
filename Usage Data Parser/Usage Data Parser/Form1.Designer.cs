@@ -58,7 +58,7 @@
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.label2 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.versionText = new System.Windows.Forms.Label();
+            this.summariseSelectedDataButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).BeginInit();
@@ -401,7 +401,7 @@
             this.groupBox9.Size = new System.Drawing.Size(485, 80);
             this.groupBox9.TabIndex = 16;
             this.groupBox9.TabStop = false;
-            this.groupBox9.Text = "File Details";
+            this.groupBox9.Text = "Selection Details";
             // 
             // label2
             // 
@@ -421,21 +421,22 @@
             this.pictureBox1.TabIndex = 17;
             this.pictureBox1.TabStop = false;
             // 
-            // versionText
+            // summariseSelectedDataButton
             // 
-            this.versionText.AutoSize = true;
-            this.versionText.Location = new System.Drawing.Point(13, 83);
-            this.versionText.Name = "versionText";
-            this.versionText.Size = new System.Drawing.Size(42, 13);
-            this.versionText.TabIndex = 18;
-            this.versionText.Text = "Version";
+            this.summariseSelectedDataButton.Location = new System.Drawing.Point(12, 82);
+            this.summariseSelectedDataButton.Name = "summariseSelectedDataButton";
+            this.summariseSelectedDataButton.Size = new System.Drawing.Size(273, 28);
+            this.summariseSelectedDataButton.TabIndex = 18;
+            this.summariseSelectedDataButton.Text = "Summarise Selected Data";
+            this.summariseSelectedDataButton.UseVisualStyleBackColor = true;
+            this.summariseSelectedDataButton.Click += new System.EventHandler(this.summariseSelectedDataButton_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 879);
-            this.Controls.Add(this.versionText);
+            this.Controls.Add(this.summariseSelectedDataButton);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox1);
@@ -472,7 +473,6 @@
             this.groupBox9.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -507,7 +507,7 @@
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label versionText;
+        private System.Windows.Forms.Button summariseSelectedDataButton;
     }
 }
 
