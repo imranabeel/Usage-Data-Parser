@@ -10,6 +10,8 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Usage_Data_Parser
 {
+
+
     public partial class Form1 : Form
     {
         private List<ParsedJSONFile> parsedFiles = new List<ParsedJSONFile>();
@@ -257,6 +259,17 @@ namespace Usage_Data_Parser
                         dt9.Rows.Add(row14);
                         dataGridViewAccel.DataSource = dt9;
                     }
+                }
+            }
+            else
+            {
+                label1.Text = "Folder selected";
+                List<TreeNode> childNodes = node.GetAllTreeNodes();
+
+                label1.Text += " with " + childNodes.Count + " children";
+                foreach (TreeNode subNode in childNodes)
+                {
+                    Console.WriteLine(subNode.Text);
                 }
             }
         }
@@ -520,6 +533,20 @@ namespace Usage_Data_Parser
                     excel = null;
                 }
             }
+        }
+    }
+
+    public static class TreeViewExtensions
+    {
+        public static List<TreeNode> GetAllTreeNodes(this TreeNode _self)
+        {
+            List<TreeNode> result = new List<TreeNode>();
+            foreach (TreeNode child in _self.Nodes)
+            {
+                result.Add(child);
+                result.AddRange(child.GetAllTreeNodes());
+            }
+            return result;
         }
     }
 }
