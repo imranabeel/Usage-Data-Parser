@@ -1,0 +1,16 @@
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Usage Data Parser.exe.config
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Usage Data Parser.exe
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Usage Data Parser.pdb
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.csproj.ResolveComReference.cache
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage_Data_Parser.Form1.resources
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage_Data_Parser.Properties.Resources.resources
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.csproj.GenerateResource.cache
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.csproj.CoreCompileInputs.cache
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.exe
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.pdb
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Microsoft.WindowsAPICodePack.dll
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Microsoft.WindowsAPICodePack.xml
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\bin\Release\Microsoft.WindowsAPICodePack.Shell.xml
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.csproj.CopyComplete
+C:\Users\Chris\Documents\GitHub\Usage Data Parser\Usage Data Parser\Usage Data Parser\obj\Release\Usage Data Parser.csprojAssemblyReference.cache
