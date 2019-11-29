@@ -77,6 +77,8 @@ namespace Usage_Data_Parser
 
         private void FileFolderSelected(object sender, TreeViewEventArgs e)
         {
+            label1.Text = "";
+            label2.Text = "";
             if (oldNode != null)
             {
                 Font normalFont = new Font(treeView1.Font, FontStyle.Regular);
