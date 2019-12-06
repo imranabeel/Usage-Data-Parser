@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -580,6 +581,8 @@ namespace Usage_Data_Parser
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //// TODO: This line of code loads data into the 'myFirstDatabaseDataSet.test' table. You can move, or remove it, as needed.
+            //this.testTableAdapter.Fill(this.myFirstDatabaseDataSet.test);
             this.Text += " v" + Version.getVersion();
 
             string lastOpenedUsageDataPath = Properties.Settings.Default.usageDataPath;
@@ -609,6 +612,34 @@ namespace Usage_Data_Parser
             if (numberOfSelectedDataFiles > 0)
             {
                 Console.WriteLine("Summarising data");
+                
+                for (int i = 0; i < numberOfSelectedDataFiles; i++)
+                {
+                    TreeNode _node = selectedDataFiles[i];
+                    string _fullpath = _node.Tag.ToString();
+                    byte[] hash;
+                    int newFiles = 0;
+                    using (FileStream stream = File.OpenRead(_fullpath))
+                    {
+                        var sha265 = SHA256.Create();
+                        hash = sha265.ComputeHash(stream);
+
+                        // Debug for hashes
+                        string result = "";
+                        foreach (byte b in hash)
+                        {
+                            result += b.ToString("x2");
+                        }
+                        Console.WriteLine(result);
+                        // ---
+                        
+                        
+                        //if (hash)
+                        //{
+
+                        //}
+                    }
+                }
                 ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfSelectedDataFiles];
 
                 for (int i = 0; i < numberOfSelectedDataFiles; i++)

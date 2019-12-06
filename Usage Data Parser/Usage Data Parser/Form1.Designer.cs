@@ -28,10 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.button1 = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.dataGridViewHandConfig = new System.Windows.Forms.DataGridView();
+            this.myFirstDatabaseDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.myFirstDatabaseDataSet = new Usage_Data_Parser.myFirstDatabaseDataSet();
             this.dataGridViewSummary = new System.Windows.Forms.DataGridView();
             this.dataGridViewGrips = new System.Windows.Forms.DataGridView();
             this.dataGridViewBattSummary = new System.Windows.Forms.DataGridView();
@@ -60,6 +63,8 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.summariseSelectedDataButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSetBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBattSummary)).BeginInit();
@@ -105,17 +110,26 @@
             // 
             // dataGridViewHandConfig
             // 
-            this.dataGridViewHandConfig.AllowUserToAddRows = false;
-            this.dataGridViewHandConfig.AllowUserToDeleteRows = false;
             this.dataGridViewHandConfig.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewHandConfig.AutoGenerateColumns = false;
             this.dataGridViewHandConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewHandConfig.DataSource = this.myFirstDatabaseDataSetBindingSource;
             this.dataGridViewHandConfig.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridViewHandConfig.Location = new System.Drawing.Point(5, 19);
             this.dataGridViewHandConfig.Name = "dataGridViewHandConfig";
-            this.dataGridViewHandConfig.ReadOnly = true;
             this.dataGridViewHandConfig.Size = new System.Drawing.Size(453, 57);
             this.dataGridViewHandConfig.TabIndex = 2;
+            // 
+            // myFirstDatabaseDataSetBindingSource
+            // 
+            this.myFirstDatabaseDataSetBindingSource.DataSource = this.myFirstDatabaseDataSet;
+            this.myFirstDatabaseDataSetBindingSource.Position = 0;
+            // 
+            // myFirstDatabaseDataSet
+            // 
+            this.myFirstDatabaseDataSet.DataSetName = "myFirstDatabaseDataSet";
+            this.myFirstDatabaseDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
             // dataGridViewSummary
             // 
@@ -448,6 +462,8 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSetBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSet)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSummary)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGrips)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBattSummary)).EndInit();
@@ -508,6 +524,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button summariseSelectedDataButton;
+        private System.Windows.Forms.BindingSource myFirstDatabaseDataSetBindingSource;
+        private myFirstDatabaseDataSet myFirstDatabaseDataSet;
     }
 }
 

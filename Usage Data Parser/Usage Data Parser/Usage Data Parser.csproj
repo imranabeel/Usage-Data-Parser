@@ -59,6 +59,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="myFirstDatabaseDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>myFirstDatabaseDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Version.cs" />
     <Compile Include="DodgyJsonParser.cs" />
     <Compile Include="Form1.cs">
@@ -85,6 +90,17 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="myFirstDatabaseDataSet.xsc">
+      <DependentUpon>myFirstDatabaseDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="myFirstDatabaseDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>myFirstDatabaseDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="myFirstDatabaseDataSet.xss">
+      <DependentUpon>myFirstDatabaseDataSet.xsd</DependentUpon>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

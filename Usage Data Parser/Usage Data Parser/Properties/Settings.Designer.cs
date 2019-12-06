@@ -34,5 +34,16 @@ namespace Usage_Data_Parser.Properties {
                 this["usageDataPath"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=OPENBIONICS3\\SQLEXPRESS;Initial Catalog=myFirstDatabase;Integrated Se" +
+            "curity=True")]
+        public string myFirstDatabaseConnectionString {
+            get {
+                return ((string)(this["myFirstDatabaseConnectionString"]));
+            }
+        }
     }
 }
