@@ -3,6 +3,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
@@ -611,41 +612,76 @@ namespace Usage_Data_Parser
             Console.WriteLine(numberOfSelectedDataFiles);
             if (numberOfSelectedDataFiles > 0)
             {
+
+
                 Console.WriteLine("Summarising data");
+                List<TreeNode> newFiles = new List<TreeNode>();
+
                 
                 for (int i = 0; i < numberOfSelectedDataFiles; i++)
                 {
                     TreeNode _node = selectedDataFiles[i];
                     string _fullpath = _node.Tag.ToString();
                     byte[] hash;
-                    int newFiles = 0;
                     using (FileStream stream = File.OpenRead(_fullpath))
                     {
                         var sha265 = SHA256.Create();
                         hash = sha265.ComputeHash(stream);
-
-                        // Debug for hashes
-                        string result = "";
-                        foreach (byte b in hash)
-                        {
-                            result += b.ToString("x2");
-                        }
-                        Console.WriteLine(result);
-                        // ---
-                        
-                        
-                        //if (hash)
-                        //{
-
-                        //}
                     }
+
+                    // Debug for hashes
+                    string hashString = "";
+                    foreach (byte b in hash)
+                    {
+                        hashString += b.ToString("x2");
+                    }
+
+                    // ----- refactor Establish Connection
+                    string connectionString;
+                    SqlConnection connection;
+                    connectionString = @"Data Source=localhost\SQLEXPRESS; Database=myFirstDatabase; Integrated Security=True;";
+                    connection = new SqlConnection(connectionString);
+                    connection.Open();
+                    // -----
+
+                    SqlDataReader dataReader;
+                    string sql = "SELECT COUNT(1) FROM test WHERE SessionID = '" + hashString + "';";
+                    Console.WriteLine("SQL Query: " + sql);
+                    SqlCommand command = new SqlCommand(sql, connection);
+                    dataReader = command.ExecuteReader();
+                    String sqlReadOutput = "";
+                    while (dataReader.Read())
+                    {
+                        sqlReadOutput += dataReader.GetValue(0) + "\n";
+                    }
+                    dataReader.Close();
+                    int numberOfMatchingRecords = Int32.Parse(sqlReadOutput);
+                    Console.WriteLine("Records Matched:" + numberOfMatchingRecords.ToString() + ";");
+
+                    if (numberOfMatchingRecords == 0)
+                    {
+                        Console.WriteLine("Adding record");
+                        newFiles.Add(selectedDataFiles[i]);
+                        //SqlDataAdapter adapter = new SqlDataAdapter();
+                        //sql = "Insert into test (SessionID) values (@SessionID)";
+                        //command = new SqlCommand(sql, connection);
+                        //SqlParameter sessionIDParam = new SqlParameter();
+                        //sessionIDParam.ParameterName = "@SessionID";
+                        //sessionIDParam.Value = hashString;
+                        //command.Parameters.Add(sessionIDParam);
+                        //adapter.InsertCommand = command;
+                        //adapter.InsertCommand.ExecuteNonQuery();
+                        //connection.Close();
+                        //Console.WriteLine("SQL insertion: " + sql);
+                    }
+
                 }
                 ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfSelectedDataFiles];
-
-                for (int i = 0; i < numberOfSelectedDataFiles; i++)
+                int numberOfNewFiles = newFiles.Count;
+                for (int i = 0; i < numberOfNewFiles; i++)
                 {
 
-                    TreeNode _node = selectedDataFiles[i];
+                    TreeNode _node = newFiles[i];
                     string _fullpath = _node.Tag.ToString();
                     jsonParsedDataFiles[i] = ParseUsageDataFile(_node, _fullpath);
 
