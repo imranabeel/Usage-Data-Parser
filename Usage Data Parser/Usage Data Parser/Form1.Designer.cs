@@ -441,7 +441,7 @@
             this.summariseSelectedDataButton.Name = "summariseSelectedDataButton";
             this.summariseSelectedDataButton.Size = new System.Drawing.Size(273, 28);
             this.summariseSelectedDataButton.TabIndex = 18;
-            this.summariseSelectedDataButton.Text = "Summarise Selected Data";
+            this.summariseSelectedDataButton.Text = "Upload the Selected Sessions to the Database";
             this.summariseSelectedDataButton.UseVisualStyleBackColor = true;
             this.summariseSelectedDataButton.Click += new System.EventHandler(this.summariseSelectedDataButton_Click);
             // 

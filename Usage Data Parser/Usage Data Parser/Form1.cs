@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -609,18 +610,36 @@ namespace Usage_Data_Parser
         private void summariseSelectedDataButton_Click(object sender, EventArgs e)
         {
             int numberOfSelectedDataFiles = selectedDataFiles.Count;
-            Console.WriteLine(numberOfSelectedDataFiles);
             if (numberOfSelectedDataFiles > 0)
             {
-
-
-                Console.WriteLine("Summarising data");
                 List<TreeNode> newFiles = new List<TreeNode>();
+                List<String> newHashes = new List<String>();
+                List<DateTime> newDataCollectionDates = new List<DateTime>();
+                List<String> newHandNumbers = new List<String>();
 
                 
                 for (int i = 0; i < numberOfSelectedDataFiles; i++)
                 {
                     TreeNode _node = selectedDataFiles[i];
+                    DateTime dataCollectionDate;
+                    string handNumber;
+                    try
+                    {
+                        dataCollectionDate = GetDataCollectionDate(_node);
+                    }
+                    catch (System.NullReferenceException)
+                    {
+                        dataCollectionDate = DateTime.MinValue;
+                    }
+                    try
+                    {
+                        handNumber = GetHandNumber(_node);
+                    }
+                    catch (System.NullReferenceException)
+                    {
+                        handNumber = null;
+                    }
+
                     string _fullpath = _node.Tag.ToString();
                     byte[] hash;
                     using (FileStream stream = File.OpenRead(_fullpath))
@@ -629,24 +648,19 @@ namespace Usage_Data_Parser
                         hash = sha265.ComputeHash(stream);
                     }
 
-                    // Debug for hashes
+                    // Convert hash to string for human readability
                     string hashString = "";
                     foreach (byte b in hash)
                     {
                         hashString += b.ToString("x2");
                     }
 
-                    // ----- refactor Establish Connection
-                    string connectionString;
-                    SqlConnection connection;
-                    connectionString = @"Data Source=localhost\SQLEXPRESS; Database=myFirstDatabase; Integrated Security=True;";
-                    connection = new SqlConnection(connectionString);
-                    connection.Open();
-                    // -----
+                    //Establish Connection to database
+                    SqlConnection connection = EstablishConnectionToSqlDatabase();
 
+                    // Search to see if the record already exists
                     SqlDataReader dataReader;
                     string sql = "SELECT COUNT(1) FROM test WHERE SessionID = '" + hashString + "';";
-                    Console.WriteLine("SQL Query: " + sql);
                     SqlCommand command = new SqlCommand(sql, connection);
                     dataReader = command.ExecuteReader();
                     String sqlReadOutput = "";
@@ -656,123 +670,259 @@ namespace Usage_Data_Parser
                     }
                     dataReader.Close();
                     int numberOfMatchingRecords = Int32.Parse(sqlReadOutput);
-                    Console.WriteLine("Records Matched:" + numberOfMatchingRecords.ToString() + ";");
 
-                    if (numberOfMatchingRecords == 0)
+                    // If there is a duplicate of a record in the selected files, it won't be in the database yet
+                    // so each will pass the check. Therefore they list to add is also checked for duplicates
+                    bool isAlreadyInUpload = newHashes.Contains(hashString);
+
+                    // If it's not in the database or already set to be inserted
+                    if (numberOfMatchingRecords == 0 && !isAlreadyInUpload)
                     {
-                        Console.WriteLine("Adding record");
+                        newHashes.Add(hashString);
+                        newDataCollectionDates.Add(dataCollectionDate);
+                        newHandNumbers.Add(handNumber);
                         newFiles.Add(selectedDataFiles[i]);
-                        //SqlDataAdapter adapter = new SqlDataAdapter();
-                        //sql = "Insert into test (SessionID) values (@SessionID)";
-                        //command = new SqlCommand(sql, connection);
-                        //SqlParameter sessionIDParam = new SqlParameter();
-                        //sessionIDParam.ParameterName = "@SessionID";
-                        //sessionIDParam.Value = hashString;
-                        //command.Parameters.Add(sessionIDParam);
-                        //adapter.InsertCommand = command;
-                        //adapter.InsertCommand.ExecuteNonQuery();
-                        //connection.Close();
-                        //Console.WriteLine("SQL insertion: " + sql);
                     }
 
+
                 }
-                ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfSelectedDataFiles];
+
                 int numberOfNewFiles = newFiles.Count;
+                ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfNewFiles];
                 for (int i = 0; i < numberOfNewFiles; i++)
                 {
-
                     TreeNode _node = newFiles[i];
                     string _fullpath = _node.Tag.ToString();
                     jsonParsedDataFiles[i] = ParseUsageDataFile(_node, _fullpath);
-
                 }
-                int[] averageActiveTime = new int[] { 0, 0, 0, 0 };
-                int[] averageOnTime = new int[] { 0, 0, 0, 0 };
-                int[] totalActiveTime = new int[] { 0, 0, 0, 0 };
-                int[] totalOnTime = new int[] { 0, 0, 0, 0 };
+                TimeSpan averageActiveTime = TimeSpan.Zero;
+                TimeSpan averageOnTime = TimeSpan.Zero;
+                TimeSpan totalActiveTime = TimeSpan.Zero;
+                TimeSpan totalOnTime = TimeSpan.Zero;
                 int count = 0;
-                foreach (ParsedJSONFile file in jsonParsedDataFiles)
+                //foreach (ParsedJSONFile file in jsonParsedDataFiles)
+                for (int i = 0; i < numberOfNewFiles; i++)
                 {
+                    ParsedJSONFile file = jsonParsedDataFiles[i];
                     if (file != null)
                     {
-                        int[] sessionActiveTime = ParseStringToDuration(file.time.activeTime);
-                        int[] sesssionOnTime = ParseStringToDuration(file.time.onTime);
-                        if (sessionActiveTime[3] >= 0)
+                        TimeSpan sessionActiveTime = TimeSpan.Parse(file.time.activeTime);
+                        TimeSpan sesssionOnTime = TimeSpan.Parse(file.time.onTime);
+                        if (sessionActiveTime >= TimeSpan.Zero)
                         {
-                            for (int i = 0; i < sessionActiveTime.Length; i++)
-                            {
-                                totalActiveTime[i] += sessionActiveTime[i];
-                                totalOnTime[i] += sesssionOnTime[i];
-
-                            }
+                            totalActiveTime += sessionActiveTime;
+                            totalOnTime += sesssionOnTime;
                             count++;
                         }
                     }
                     else
                     {
-                        Console.WriteLine("file is null");
+                        Console.WriteLine("File is null");
                     }
+
+                    InsertSessionToSQLdatabase(newHashes[i], newDataCollectionDates[i], newHandNumbers[i], file);
+
                 }
                 if (count > 0)
                 {
-                    for (int i = 0; i < averageActiveTime.Length; i++)
-                    {
-                        averageActiveTime[i] = totalActiveTime[i] / count;
-                        averageOnTime[i] = totalOnTime[i] / count;
-                    }
+                    averageActiveTime = TimeSpan.FromTicks(totalActiveTime.Ticks / count);
+                    averageOnTime = TimeSpan.FromTicks(totalOnTime.Ticks / count);
                 }
 
-                string averageActiveTimeString = ParseDurationToString(averageActiveTime);
-                string averageOnTimeString = ParseDurationToString(averageOnTime);
-                string totalActiveTimeString = ParseDurationToString(totalActiveTime);
-                string totalOnTimeString = ParseDurationToString(totalOnTime);
-                string total_m_traveled = (
-                    (float)(totalActiveTime[0] * 86400f + 
-                    (float)totalActiveTime[1] * 3600f + 
-                    (float)totalActiveTime[2] * 60f + 
-                    (float)totalActiveTime[3]) * 
-                    23f / 1000f).ToString(); //23 mm per second at no load.
+                string averageActiveTimeString = averageActiveTime.ToString("g");
+                string averageOnTimeString = averageOnTime.ToString("g");
+                string totalActiveTimeString = totalActiveTime.ToString("g");
+                string totalOnTimeString = totalOnTime.ToString("g");
+                string total_m_traveled = ((float)totalActiveTime.Seconds * 23f / 1000f).ToString("g"); //23 mm per second at no load.
 
                 DisplaySummarisedData(count, averageOnTimeString, averageActiveTimeString, totalOnTimeString, totalActiveTimeString, total_m_traveled);
+
+                if (numberOfNewFiles > 0)
+                {
+                    label1.Text = numberOfNewFiles.ToString() + " sessions added to the database.";
+                }
+                else
+                {
+                    label1.Text = "No new sessions in selection. No sessions added to the database.";
+                }
             }
         }
 
-        private string ParseDurationToString(int[] duration) // This is not quite right. Number of Sessions * average != total. 
+        private string GetHandNumber(TreeNode node)
         {
-            int seconds = duration[3];
-            int remainingSeconds = seconds % 60;
-            int extraMinutes = seconds / 60;
-
-            int minutes = duration[2] + extraMinutes;
-            int remainingMinutes = minutes % 60;
-            int extraHours = minutes / 60;
-
-            int hours = duration[1] + extraHours;
-            int remainingHours = hours % 24;
-            int extraDays = hours / 24;
-
-            int days = duration[0] + extraDays;
-
-            string result = days.ToString("00") + ":";
-            result += remainingHours.ToString("00") + ":";
-            result += remainingMinutes.ToString("00") + ":";
-            result += remainingSeconds.ToString("00");
-            return result;
-        }
-
-        private int[] ParseStringToDuration(string activeTimeString)
-        {
-            if (activeTimeString != null) // && activeTimeString.Length == 12
+            TreeNode parent;
+            try
             {
-                int days = Int32.Parse(activeTimeString.Substring(0, 2));
-                int hours = Int32.Parse(activeTimeString.Substring(3, 2));
-                int minutes = Int32.Parse(activeTimeString.Substring(6, 2));
-                int seconds = Int32.Parse(activeTimeString.Substring(9, 2));
-
-                int[] activeTimeFloat = new int[] { days, hours, minutes, seconds };
-                return activeTimeFloat;
+                parent = node.Parent;
             }
-            return new int[] { -1, -1, -1, -1, };
+            catch (System.NullReferenceException)
+            {
+                throw;
+            }
+
+            string text = parent.Text;
+            string pattern = @"^H[0-9]{1,5}$";
+            Regex rx = new Regex(pattern);
+            if (rx.IsMatch(text))
+            {
+                return text;
+            }
+            else
+            {
+                return GetHandNumber(parent);
+            }
+        }
+
+        private DateTime GetDataCollectionDate(TreeNode node)
+        {
+            TreeNode parent;
+            try
+            {
+                parent = node.Parent;
+            }
+            catch (System.NullReferenceException)
+            {
+                throw;
+            }
+            
+            try
+            {
+                return DateTime.Parse(parent.Text);
+            }
+            catch (System.FormatException)
+            {
+                return GetDataCollectionDate(parent);
+            }
+        }
+
+        private static SqlConnection EstablishConnectionToSqlDatabase()
+        {
+            string connectionString;
+            SqlConnection connection;
+            connectionString = @"Data Source=localhost\SQLEXPRESS; Database=myFirstDatabase; Integrated Security=True;";
+            connection = new SqlConnection(connectionString);
+            connection.Open();
+            return connection;
+        }
+
+        private void InsertSessionToSQLdatabase(string hashString, DateTime dataCollectionDate, string handNumber, ParsedJSONFile session)
+        {
+            SqlConnection connection = EstablishConnectionToSqlDatabase();
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string sql = "Insert into test (" +
+                "SessionID, " +
+                "DataCollectionDate, " +
+                "SessionNumber, " +
+                "HandNumber, " + 
+                "serialNumber, " +
+                "firmwareVersion, " +
+                "chirality, " +
+                "nMotors, " +
+                "resetCause, " +
+                "activeTime, " +
+                "onTime, " +
+                "BatteryMinV, " +
+                "BatteryMaxV, " +
+                "TempMinC, " +
+                "TempMaxC," +
+                "MagMaxX, " +
+                "MagMaxY, " +
+                "AccelMaxX, " +
+                "AccelMaxY," +
+                "AccelMaxz) " +
+                " values (" +
+                "@SessionID, " +
+                "@DataCollectionDate, " +
+                "@SessionNumber, " + 
+                "@HandNumber, " + 
+                "@serialNumber, " +
+                "@firmwareVersion, " +
+                "@chirality, " +
+                "@nMotors, " +
+                "@resetCause, " +
+                "@activeTime, " +
+                "@onTime, " +
+                "@BatteryMinV, " +
+                "@BatteryMaxV, " +
+                "@TempMinC, " +
+                "@TempMaxC ," +
+                "@MagMaxX, " +
+                "@MagMaxY, " +
+                "@AccelMaxX, " +
+                "@AccelMaxY, " +
+                "@AccelMaxZ)";
+            SqlCommand command = new SqlCommand(sql, connection);
+            SqlParameter sessionIDParam = new SqlParameter();
+            command.Parameters.AddWithValue("@SessionID", hashString);
+            if (dataCollectionDate != DateTime.MinValue)
+            {
+                command.Parameters.AddWithValue("@DataCollectionDate", dataCollectionDate);
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@dataCollectionDate", DBNull.Value);
+            }
+            command.Parameters.AddWithValue("@SessionNumber", session.sessionN);
+            if (handNumber != null)
+            {
+                command.Parameters.AddWithValue("@HandNumber", handNumber);
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@HandNumber", DBNull.Value);
+            }
+            command.Parameters.AddWithValue("@serialNumber", session.handConfig.serialNum);
+            command.Parameters.AddWithValue("@firmwareVersion", session.handConfig.fwVer);
+            command.Parameters.AddWithValue("@chirality", session.handConfig.chirality);
+            command.Parameters.AddWithValue("@nMotors", session.handConfig.nMotors);
+            command.Parameters.AddWithValue("@resetCause", session.resetCause);
+            command.Parameters.AddWithValue("@activeTime", TimeSpan.Parse(session.time.activeTime));
+            command.Parameters.AddWithValue("@onTime", TimeSpan.Parse(session.time.onTime));
+            if (session.battery != null)
+            {
+                command.Parameters.AddWithValue("@BatteryMinV", Single.Parse(session.battery.min.battV));
+                command.Parameters.AddWithValue("@BatteryMaxV", Single.Parse(session.battery.max.battV));
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@BatteryMinV", DBNull.Value);
+                command.Parameters.AddWithValue("@BatteryMaxV", DBNull.Value);
+            }
+            if (session.temp != null)
+            {
+                command.Parameters.AddWithValue("@TempMinC", Single.Parse(session.temp.minTemp.tempC));
+                command.Parameters.AddWithValue("@TempMaxC", Single.Parse(session.temp.maxTemp.tempC));
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@TempMinC", DBNull.Value);
+                command.Parameters.AddWithValue("@TempMaxC", DBNull.Value);
+            }
+            if (session.magFlux != null)
+            {
+                command.Parameters.AddWithValue("@MagMaxX", Single.Parse(session.magFlux.X.max));
+                command.Parameters.AddWithValue("@MagMaxY", Single.Parse(session.magFlux.Y.max));
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@MagMaxX", DBNull.Value);
+                command.Parameters.AddWithValue("@MagMaxY", DBNull.Value);
+            }
+            if (session.accel != null)
+            {
+                command.Parameters.AddWithValue("@AccelMaxX", Single.Parse(session.accel.X.max));
+                command.Parameters.AddWithValue("@AccelMaxY", Single.Parse(session.accel.Y.max));
+                command.Parameters.AddWithValue("@AccelMaxZ", Single.Parse(session.accel.Z.max));
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@AccelMaxX", DBNull.Value);
+                command.Parameters.AddWithValue("@AccelMaxY", DBNull.Value);
+                command.Parameters.AddWithValue("@AccelMaxZ", DBNull.Value);
+            }
+            adapter.InsertCommand = command;
+            adapter.InsertCommand.ExecuteNonQuery();
+            connection.Close();
         }
     }
 
