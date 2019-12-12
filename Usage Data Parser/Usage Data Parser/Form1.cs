@@ -583,8 +583,8 @@ namespace Usage_Data_Parser
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //// TODO: This line of code loads data into the 'myFirstDatabaseDataSet.test' table. You can move, or remove it, as needed.
-            //this.testTableAdapter.Fill(this.myFirstDatabaseDataSet.test);
+            //// TODO: This line of code loads data into the 'HeroUsageData.sessions' table. You can move, or remove it, as needed.
+            //this.sessionsTableAdapter.Fill(thisHeroUsageData.sessions);
             this.Text += " v" + Version.getVersion();
 
             string lastOpenedUsageDataPath = Properties.Settings.Default.usageDataPath;
@@ -615,6 +615,7 @@ namespace Usage_Data_Parser
                 List<TreeNode> newFiles = new List<TreeNode>();
                 List<String> newHashes = new List<String>();
                 List<DateTime> newDataCollectionDates = new List<DateTime>();
+                List<Int32> collectedOverDays = new List<int>();
                 List<String> newHandNumbers = new List<String>();
 
                 
@@ -660,7 +661,7 @@ namespace Usage_Data_Parser
 
                     // Search to see if the record already exists
                     SqlDataReader dataReader;
-                    string sql = "SELECT COUNT(1) FROM test WHERE SessionID = '" + hashString + "';";
+                    string sql = "SELECT COUNT(1) FROM sessions WHERE SessionID = '" + hashString + "';";
                     SqlCommand command = new SqlCommand(sql, connection);
                     dataReader = command.ExecuteReader();
                     String sqlReadOutput = "";
@@ -680,6 +681,7 @@ namespace Usage_Data_Parser
                     {
                         newHashes.Add(hashString);
                         newDataCollectionDates.Add(dataCollectionDate);
+                        collectedOverDays.Add(-1); // To Implement
                         newHandNumbers.Add(handNumber);
                         newFiles.Add(selectedDataFiles[i]);
                     }
@@ -691,6 +693,7 @@ namespace Usage_Data_Parser
                 ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfNewFiles];
                 for (int i = 0; i < numberOfNewFiles; i++)
                 {
+                    label1.Text = "Adding session " + i.ToString() + " of " + numberOfNewFiles.ToString() + ".";
                     TreeNode _node = newFiles[i];
                     string _fullpath = _node.Tag.ToString();
                     jsonParsedDataFiles[i] = ParseUsageDataFile(_node, _fullpath);
@@ -700,18 +703,18 @@ namespace Usage_Data_Parser
                 TimeSpan totalActiveTime = TimeSpan.Zero;
                 TimeSpan totalOnTime = TimeSpan.Zero;
                 int count = 0;
-                //foreach (ParsedJSONFile file in jsonParsedDataFiles)
+
                 for (int i = 0; i < numberOfNewFiles; i++)
                 {
                     ParsedJSONFile file = jsonParsedDataFiles[i];
                     if (file != null)
                     {
-                        TimeSpan sessionActiveTime = TimeSpan.Parse(file.time.activeTime);
-                        TimeSpan sesssionOnTime = TimeSpan.Parse(file.time.onTime);
-                        if (sessionActiveTime >= TimeSpan.Zero)
+                        TimeSpan sessionActiveTime;
+                        TimeSpan sessionOnTime;
+                        if (file.time != null && TimeSpan.TryParse(file.time.activeTime, out sessionActiveTime) && TimeSpan.TryParse(file.time.onTime, out sessionOnTime))
                         {
                             totalActiveTime += sessionActiveTime;
-                            totalOnTime += sesssionOnTime;
+                            totalOnTime += sessionOnTime;
                             count++;
                         }
                     }
@@ -720,7 +723,7 @@ namespace Usage_Data_Parser
                         Console.WriteLine("File is null");
                     }
 
-                    InsertSessionToSQLdatabase(newHashes[i], newDataCollectionDates[i], newHandNumbers[i], file);
+                    InsertSessionToSQLdatabase(newHashes[i], newDataCollectionDates[i], collectedOverDays[i], newHandNumbers[i], file);
 
                 }
                 if (count > 0)
@@ -799,19 +802,20 @@ namespace Usage_Data_Parser
         {
             string connectionString;
             SqlConnection connection;
-            connectionString = @"Data Source=localhost\SQLEXPRESS; Database=myFirstDatabase; Integrated Security=True;";
+            connectionString = @"Data Source=localhost\SQLEXPRESS; Database=HeroUsageData; Integrated Security=True;";
             connection = new SqlConnection(connectionString);
             connection.Open();
             return connection;
         }
 
-        private void InsertSessionToSQLdatabase(string hashString, DateTime dataCollectionDate, string handNumber, ParsedJSONFile session)
+        private void InsertSessionToSQLdatabase(string hashString, DateTime dataCollectionDate, int dataCollectedOverDays, string handNumber, ParsedJSONFile session)
         {
             SqlConnection connection = EstablishConnectionToSqlDatabase();
             SqlDataAdapter adapter = new SqlDataAdapter();
-            string sql = "Insert into test (" +
+            string sql = "Insert into sessions (" +
                 "SessionID, " +
                 "DataCollectionDate, " +
+                "DataCollectedOverDays, " +
                 "SessionNumber, " +
                 "HandNumber, " + 
                 "serialNumber, " +
@@ -833,6 +837,7 @@ namespace Usage_Data_Parser
                 " values (" +
                 "@SessionID, " +
                 "@DataCollectionDate, " +
+                "@DataCollectedOverDays, " +
                 "@SessionNumber, " + 
                 "@HandNumber, " + 
                 "@serialNumber, " +
@@ -854,72 +859,26 @@ namespace Usage_Data_Parser
             SqlCommand command = new SqlCommand(sql, connection);
             SqlParameter sessionIDParam = new SqlParameter();
             command.Parameters.AddWithValue("@SessionID", hashString);
-            if (dataCollectionDate != DateTime.MinValue)
-            {
-                command.Parameters.AddWithValue("@DataCollectionDate", dataCollectionDate);
-            }
-            else
-            {
-                command.Parameters.AddWithValue("@dataCollectionDate", DBNull.Value);
-            }
-            command.Parameters.AddWithValue("@SessionNumber", session.sessionN);
-            if (handNumber != null)
-            {
-                command.Parameters.AddWithValue("@HandNumber", handNumber);
-            }
-            else
-            {
-                command.Parameters.AddWithValue("@HandNumber", DBNull.Value);
-            }
-            command.Parameters.AddWithValue("@serialNumber", session.handConfig.serialNum);
-            command.Parameters.AddWithValue("@firmwareVersion", session.handConfig.fwVer);
-            command.Parameters.AddWithValue("@chirality", session.handConfig.chirality);
-            command.Parameters.AddWithValue("@nMotors", session.handConfig.nMotors);
-            command.Parameters.AddWithValue("@resetCause", session.resetCause);
-            command.Parameters.AddWithValue("@activeTime", TimeSpan.Parse(session.time.activeTime));
-            command.Parameters.AddWithValue("@onTime", TimeSpan.Parse(session.time.onTime));
-            if (session.battery != null)
-            {
-                command.Parameters.AddWithValue("@BatteryMinV", Single.Parse(session.battery.min.battV));
-                command.Parameters.AddWithValue("@BatteryMaxV", Single.Parse(session.battery.max.battV));
-            }
-            else
-            {
-                command.Parameters.AddWithValue("@BatteryMinV", DBNull.Value);
-                command.Parameters.AddWithValue("@BatteryMaxV", DBNull.Value);
-            }
-            if (session.temp != null)
-            {
-                command.Parameters.AddWithValue("@TempMinC", Single.Parse(session.temp.minTemp.tempC));
-                command.Parameters.AddWithValue("@TempMaxC", Single.Parse(session.temp.maxTemp.tempC));
-            }
-            else
-            {
-                command.Parameters.AddWithValue("@TempMinC", DBNull.Value);
-                command.Parameters.AddWithValue("@TempMaxC", DBNull.Value);
-            }
-            if (session.magFlux != null)
-            {
-                command.Parameters.AddWithValue("@MagMaxX", Single.Parse(session.magFlux.X.max));
-                command.Parameters.AddWithValue("@MagMaxY", Single.Parse(session.magFlux.Y.max));
-            }
-            else
-            {
-                command.Parameters.AddWithValue("@MagMaxX", DBNull.Value);
-                command.Parameters.AddWithValue("@MagMaxY", DBNull.Value);
-            }
-            if (session.accel != null)
-            {
-                command.Parameters.AddWithValue("@AccelMaxX", Single.Parse(session.accel.X.max));
-                command.Parameters.AddWithValue("@AccelMaxY", Single.Parse(session.accel.Y.max));
-                command.Parameters.AddWithValue("@AccelMaxZ", Single.Parse(session.accel.Z.max));
-            }
-            else
-            {
-                command.Parameters.AddWithValue("@AccelMaxX", DBNull.Value);
-                command.Parameters.AddWithValue("@AccelMaxY", DBNull.Value);
-                command.Parameters.AddWithValue("@AccelMaxZ", DBNull.Value);
-            }
+            command.Parameters.AddWithValue("@DataCollectionDate", dataCollectionDate != DateTime.MinValue ? (object)dataCollectionDate : DBNull.Value);
+            command.Parameters.AddWithValue(@"DataCollectedOverDays", (object)dataCollectedOverDays ?? DBNull.Value);
+            command.Parameters.AddWithValue("@SessionNumber", session.sessionN); // Cannot be null
+            command.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
+            command.Parameters.AddWithValue("@serialNumber", session.handConfig != null ? (object)session.handConfig.serialNum : DBNull.Value);
+            command.Parameters.AddWithValue("@firmwareVersion", session.handConfig != null ? (object)session.handConfig.fwVer : DBNull.Value);
+            command.Parameters.AddWithValue("@chirality", session.handConfig != null ? (object)session.handConfig.chirality : DBNull.Value);
+            command.Parameters.AddWithValue("@nMotors", session.handConfig != null? (object)session.handConfig.nMotors : DBNull.Value);
+            command.Parameters.AddWithValue("@resetCause", (object)session.resetCause ?? DBNull.Value);
+            command.Parameters.AddWithValue("@activeTime", session.time != null ? (object)TimeSpan.Parse(session.time.activeTime) : DBNull.Value);
+            command.Parameters.AddWithValue("@onTime", session.time != null ? (object)TimeSpan.Parse(session.time.onTime) : DBNull.Value);
+            command.Parameters.AddWithValue("@BatteryMinV", session.battery != null ? (object)Single.Parse(session.battery.min.battV) : DBNull.Value);
+            command.Parameters.AddWithValue("@BatteryMaxV", session.battery != null ? (object)Single.Parse(session.battery.max.battV) : DBNull.Value);
+            command.Parameters.AddWithValue("@TempMinC", session.temp != null ? (object)Single.Parse(session.temp.minTemp.tempC) : DBNull.Value);
+            command.Parameters.AddWithValue("@TempMaxC", session.temp != null ? (object)Single.Parse(session.temp.maxTemp.tempC) : DBNull.Value);
+            command.Parameters.AddWithValue("@MagMaxX", session.magFlux != null ? (object)Single.Parse(session.magFlux.X.max) : DBNull.Value);
+            command.Parameters.AddWithValue("@MagMaxY", session.magFlux != null ? (object)Single.Parse(session.magFlux.Y.max) : DBNull.Value);
+            command.Parameters.AddWithValue("@AccelMaxX", session.accel != null ? (object)Single.Parse(session.accel.X.max) : DBNull.Value);
+            command.Parameters.AddWithValue("@AccelMaxY", session.accel != null ? (object)Single.Parse(session.accel.Y.max) : DBNull.Value);
+            command.Parameters.AddWithValue("@AccelMaxZ", session.accel != null ? (object)Single.Parse(session.accel.Z.max) : DBNull.Value);
             adapter.InsertCommand = command;
             adapter.InsertCommand.ExecuteNonQuery();
             connection.Close();
