@@ -20,6 +20,8 @@ namespace Usage_Data_Parser
         private List<ParsedJSONFile> parsedFiles = new List<ParsedJSONFile>();
         List<TreeNode> selectedDataFiles = new List<TreeNode>();
         private string rootNodePath = "";
+        SqlConnection connection;
+
 
         public Form1()
         {
@@ -44,21 +46,6 @@ namespace Usage_Data_Parser
                     treeView1.EndUpdate();
                 }
             }
-
-            //using (var fbd = new FolderBrowserDialog())
-            //{
-            //    fbd.ShowNewFolderButton = true;
-            //    fbd.Description = "Please select the folder which contains the usage data you want to view:";
-            //    DialogResult result = fbd.ShowDialog();
-
-            //    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-            //    {
-            //        rootNodePath = fbd.SelectedPath;
-            //        treeView1.BeginUpdate();
-            //        ListDirectory(treeView1, rootNodePath);
-            //        treeView1.EndUpdate();
-            //    }
-            //}
         }
 
         private void ListDirectory(TreeView treeView, string path)
@@ -596,6 +583,9 @@ namespace Usage_Data_Parser
                 treeView1.EndUpdate();
             }
 
+            //Establish Connection to database
+            connection = EstablishConnectionToSqlDatabase();
+
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -614,8 +604,7 @@ namespace Usage_Data_Parser
             {
                 List<TreeNode> newFiles = new List<TreeNode>();
                 List<String> newHashes = new List<String>();
-                List<DateTime> newDataCollectionDates = new List<DateTime>();
-                List<Int32> collectedOverDays = new List<int>();
+                List<String> touchPoints = new List<String>();
                 List<String> newHandNumbers = new List<String>();
 
                 
@@ -656,21 +645,22 @@ namespace Usage_Data_Parser
                         hashString += b.ToString("x2");
                     }
 
-                    //Establish Connection to database
-                    SqlConnection connection = EstablishConnectionToSqlDatabase();
 
                     // Search to see if the record already exists
-                    SqlDataReader dataReader;
-                    string sql = "SELECT COUNT(1) FROM sessions WHERE SessionID = '" + hashString + "';";
-                    SqlCommand command = new SqlCommand(sql, connection);
-                    dataReader = command.ExecuteReader();
-                    String sqlReadOutput = "";
-                    while (dataReader.Read())
+                    connection.Open();
+                    SqlDataReader sessionIdReader;
+                    string numberOfMatchingSessionsQuery = "SELECT COUNT(1) FROM sessions WHERE SessionID = @SessionID";
+                    SqlCommand command = new SqlCommand(numberOfMatchingSessionsQuery, connection);
+                    command.Parameters.AddWithValue("@SessionID", hashString);
+                    sessionIdReader = command.ExecuteReader();
+                    String numberOfMatchingSessionHashes = "";
+                    while (sessionIdReader.Read())
                     {
-                        sqlReadOutput += dataReader.GetValue(0) + "\n";
+                        numberOfMatchingSessionHashes += sessionIdReader.GetValue(0) + "\n";
                     }
-                    dataReader.Close();
-                    int numberOfMatchingRecords = Int32.Parse(sqlReadOutput);
+                    int numberOfMatchingRecords = Int32.Parse(numberOfMatchingSessionHashes);
+                    sessionIdReader.Close();
+                    connection.Close();
 
                     // If there is a duplicate of a record in the selected files, it won't be in the database yet
                     // so each will pass the check. Therefore they list to add is also checked for duplicates
@@ -680,10 +670,69 @@ namespace Usage_Data_Parser
                     if (numberOfMatchingRecords == 0 && !isAlreadyInUpload)
                     {
                         newHashes.Add(hashString);
-                        newDataCollectionDates.Add(dataCollectionDate);
-                        collectedOverDays.Add(-1); // To Implement
                         newHandNumbers.Add(handNumber);
                         newFiles.Add(selectedDataFiles[i]);
+
+                        connection.Open();
+                        SqlDataReader touchPointIdReader;
+                        string numberOfMatchingTouchPointsQuery = "SELECT max(TouchPointIndex) as [Highest Index] FROM touchPoints WHERE HandNumber = @HandNumber ; " +
+                            "SELECT TouchPointIndex AS 'Exists' FROM touchPoints WHERE HandNumber = @HandNumber AND Date = @Date";
+                        SqlCommand sqlCommand = new SqlCommand(numberOfMatchingTouchPointsQuery, connection);
+                        sqlCommand.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
+                        sqlCommand.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
+                        touchPointIdReader = sqlCommand.ExecuteReader();
+                        int[] existingTouchPoints = new int[2] { -1, -1 }; // [0] = highest index of touch points for the hand in question (i.e count - 1). [1] = Does a touchpoint exist for this date?
+                        int index = 0;
+                        while (touchPointIdReader.HasRows)
+                        {
+                            Console.WriteLine("Result: {0}", touchPointIdReader.GetName(0));
+                            while (touchPointIdReader.Read())
+                            {
+                                Console.WriteLine("value" + touchPointIdReader.GetValue(0).ToString());
+
+                                existingTouchPoints[index] = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
+                                index++;
+                            }
+                            touchPointIdReader.NextResult();
+                        }
+
+                        Console.WriteLine("latest touch point index for hand: " + existingTouchPoints[0].ToString());
+                        Console.WriteLine("touch points for hand at date exists: " + existingTouchPoints[1].ToString());
+                        touchPointIdReader.Close();
+                        sqlCommand.Dispose();
+                        connection.Close();
+                        string touchPoint = "";
+                        if (existingTouchPoints[1] == -1) // If there are no existing touch points for this session's hand and date, make one
+                        {
+                            connection.Open();
+                            SqlDataAdapter adapter = new SqlDataAdapter();
+                            int newTouchPointIndex;
+                            if (existingTouchPoints[0] == -1) // If there aren't any for the hand
+                            {
+                                newTouchPointIndex = 1; // Start on 1 as the send out date is 0
+                            }
+                            else
+                            {
+                                newTouchPointIndex = existingTouchPoints[0] + 1; // else use the latest one + 1
+                            }
+                            touchPoint = handNumber + "_" + newTouchPointIndex.ToString(); // make this this first touch point after the send out (i.e. touch point 1). 
+                            string addTouchPoint = "insert into touchPoints (TouchPointID, HandNumber, TouchPointIndex, Date) values (@TouchPointID, @HandNumber, @TouchPointIndex, @Date)";
+                            SqlCommand insertTouchPoint = new SqlCommand(addTouchPoint, connection);
+                            insertTouchPoint.Parameters.AddWithValue("@TouchPointID", touchPoint); // Cannot be null
+                            insertTouchPoint.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
+                            insertTouchPoint.Parameters.AddWithValue("@TouchPointIndex", (object)newTouchPointIndex);
+                            insertTouchPoint.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
+                            adapter.InsertCommand = insertTouchPoint;
+                            adapter.InsertCommand.ExecuteNonQuery();
+                            adapter.Dispose();
+                            insertTouchPoint.Dispose();
+                            connection.Close();
+                        }
+                        else
+                        {
+                            touchPoint = handNumber + "_" + existingTouchPoints[1]; // Set it to the matching touchpoint
+                        }
+                        touchPoints.Add(touchPoint);
                     }
 
 
@@ -723,7 +772,7 @@ namespace Usage_Data_Parser
                         Console.WriteLine("File is null");
                     }
 
-                    InsertSessionToSQLdatabase(newHashes[i], newDataCollectionDates[i], collectedOverDays[i], newHandNumbers[i], file);
+                    InsertSessionToSQLdatabase(newHashes[i], touchPoints[i], newHandNumbers[i], file);
 
                 }
                 if (count > 0)
@@ -804,18 +853,16 @@ namespace Usage_Data_Parser
             SqlConnection connection;
             connectionString = @"Data Source=localhost\SQLEXPRESS; Database=HeroUsageData; Integrated Security=True;";
             connection = new SqlConnection(connectionString);
-            connection.Open();
             return connection;
         }
 
-        private void InsertSessionToSQLdatabase(string hashString, DateTime dataCollectionDate, int dataCollectedOverDays, string handNumber, ParsedJSONFile session)
+        private void InsertSessionToSQLdatabase(string hashString, string touchPoint, string handNumber, ParsedJSONFile session)
         {
-            SqlConnection connection = EstablishConnectionToSqlDatabase();
+            connection.Open();
             SqlDataAdapter adapter = new SqlDataAdapter();
             string sql = "Insert into sessions (" +
                 "SessionID, " +
-                "DataCollectionDate, " +
-                "DataCollectedOverDays, " +
+                "CollectedInTouchPoint, " +
                 "SessionNumber, " +
                 "HandNumber, " + 
                 "serialNumber, " +
@@ -836,8 +883,7 @@ namespace Usage_Data_Parser
                 "AccelMaxz) " +
                 " values (" +
                 "@SessionID, " +
-                "@DataCollectionDate, " +
-                "@DataCollectedOverDays, " +
+                "@CollectedInTouchPoint, " +
                 "@SessionNumber, " + 
                 "@HandNumber, " + 
                 "@serialNumber, " +
@@ -857,10 +903,8 @@ namespace Usage_Data_Parser
                 "@AccelMaxY, " +
                 "@AccelMaxZ)";
             SqlCommand command = new SqlCommand(sql, connection);
-            SqlParameter sessionIDParam = new SqlParameter();
             command.Parameters.AddWithValue("@SessionID", hashString);
-            command.Parameters.AddWithValue("@DataCollectionDate", dataCollectionDate != DateTime.MinValue ? (object)dataCollectionDate : DBNull.Value);
-            command.Parameters.AddWithValue(@"DataCollectedOverDays", (object)dataCollectedOverDays ?? DBNull.Value);
+            command.Parameters.AddWithValue("@CollectedInTouchPoint", (object)touchPoint ?? DBNull.Value);
             command.Parameters.AddWithValue("@SessionNumber", session.sessionN); // Cannot be null
             command.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
             command.Parameters.AddWithValue("@serialNumber", session.handConfig != null ? (object)session.handConfig.serialNum : DBNull.Value);
