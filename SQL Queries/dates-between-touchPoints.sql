@@ -30,7 +30,8 @@ SELECT
 	b.[Total Active Time (s)],
 	CAST(b.[Total Active Time (s)] as float) * 23 / 1000 AS [Metres Traveled],
 	CAST(b.[Total On Time (s)] AS float)/CAST(a.[Number of Days] AS float) AS [Average On Time Per Day (s)],
-	CAST(b.[Total Active Time (s)] AS float)/CAST(a.[Number of Days] AS float) AS [Average Active Time Per Day (s)]
+	CAST(b.[Total Active Time (s)] AS float)/CAST(a.[Number of Days] AS float) AS [Average Active Time Per Day (s)],
+	CAST(b.[Total Active Time (s)] as float) * 23 / 1000 / a.[Number of Days] AS [Average Metres Traveled Per Day]
 INTO #temp3
 FROM #temp1 a JOIN #temp2 b ON a.TouchPointID=b.CollectedInTouchPoint
 
@@ -47,6 +48,6 @@ SELECT
 	SUM([Metres Traveled]),
 	CONVERT(DECIMAL(10,2), AVG([Average On Time Per Day (s)])) AS [Average On Time Per Day (s)],
 	CONVERT(DECIMAL(10,2), AVG([Average Active Time Per Day (s)])) AS [Average Active Time Per Day (s)],
-	CONVERT(DECIMAL(10,2), AVG([Metres Traveled])) AS [Average Distance Traveled Per Day (m)]
+	CONVERT(DECIMAL(10,2), AVG([Average Metres Traveled Per Day])) AS [Average Distance Traveled Per Day (m)]
 FROM #temp3
 GROUP BY HandNumber
