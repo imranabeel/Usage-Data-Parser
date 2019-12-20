@@ -73,6 +73,69 @@ namespace Usage_Data_Parser
             }
         }
 
+        private void TreeNode_Selected(object sender, TreeViewEventArgs e)
+        {
+            //ClearDataGrids();
+            label1.Text = "";
+            label2.Text = "";
+            if (oldNode != null)
+            {
+                Font normalFont = new Font(treeView1.Font, FontStyle.Regular);
+                oldNode.NodeFont = normalFont;
+            }
+            Font boldFont = new Font(treeView1.Font, FontStyle.Bold);
+
+            var node = treeView1.SelectedNode;
+            node.NodeFont = boldFont;
+            oldNode = node;
+
+            var tag = (string)node.Tag;
+            string fullPath = tag.ToString();
+
+            // get the file attributes for file or directory
+            FileAttributes attr = File.GetAttributes(fullPath);
+
+            // If the user selects a file
+            if (!attr.HasFlag(FileAttributes.Directory))
+            {
+                string _fullpath = node.Tag.ToString();
+                string hashString = GenerateSHA256(_fullpath);
+                foreach (DataGridViewRow row in dataGridViewHandConfig.Rows)
+                {
+                    if (row.Cells[0].Value.Equals(hashString))
+                    {
+                        dataGridViewHandConfig.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                        dataGridViewHandConfig.ClearSelection();
+                        row.Selected = true;
+                        dataGridViewHandConfig.FirstDisplayedScrollingRowIndex = dataGridViewHandConfig.SelectedRows[0].Index;
+                        break;
+                    }
+                }
+            }
+            else // If the user selects a folder get all the child nodes and add them to a list
+            {
+                label1.Text = "Folder selected";
+                List<TreeNode> childNodes = node.GetAllTreeNodes();
+
+                selectedDataFiles.Clear();
+                foreach (TreeNode childNode in childNodes)
+                {
+                    bool isDataFile = childNode.Tag.ToString().Contains("_DAT");
+                    if (isDataFile)
+                    {
+                        selectedDataFiles.Add(childNode);
+                    }
+                }
+
+                int numberOfSelectedDataFiles = selectedDataFiles.Count;
+                label1.Text += " contains " + numberOfSelectedDataFiles.ToString() + " data file";
+                if (numberOfSelectedDataFiles > 1)
+                {
+                    label1.Text += "s";
+                }
+            }
+        }
+
         private void folderSelectButton_Click(object sender, EventArgs e)
         {
             using (var directoryDialog = new CommonOpenFileDialog
@@ -599,67 +662,6 @@ namespace Usage_Data_Parser
                 directoryNode.Nodes.Add(new TreeNode(file.Name) { Tag = file.FullName });
             return directoryNode;
         }      
-
-        private void FileFolderSelected(object sender, TreeViewEventArgs e)
-        {
-            //ClearDataGrids();
-            label1.Text = "";
-            label2.Text = "";
-            if (oldNode != null)
-            {
-                Font normalFont = new Font(treeView1.Font, FontStyle.Regular);
-                oldNode.NodeFont = normalFont;
-            }
-            Font boldFont = new Font(treeView1.Font, FontStyle.Bold);
-
-            var node = treeView1.SelectedNode;
-            node.NodeFont = boldFont;
-            oldNode = node;
-
-            var tag = (string)node.Tag;
-            string fullPath = tag.ToString();
-
-            // get the file attributes for file or directory
-            FileAttributes attr = File.GetAttributes(fullPath);
-
-            // If the user selects a file
-            if (!attr.HasFlag(FileAttributes.Directory))
-            {
-                // Attempt to parse the file.
-                ParsedJSONFile jsonParsedData = ParseUsageDataFile(node, fullPath);
-                //ClearDataGrids();
-                // If the file was parsed, display it.
-                //if (jsonParsedData != null)
-                //{
-                //    //DisplayParsedJSON(jsonParsedData);
-                //}
-            }
-            else // If the user selects a folder
-            {
-                label1.Text = "Folder selected";
-                List<TreeNode> childNodes = node.GetAllTreeNodes();
-
-                selectedDataFiles.Clear();
-                foreach (TreeNode childNode in childNodes)
-                {
-                    bool isDataFile = childNode.Tag.ToString().Contains("_DAT");
-                    if (isDataFile)
-                    {
-                        selectedDataFiles.Add(childNode);
-                    }
-                }
-
-                int numberOfSelectedDataFiles = selectedDataFiles.Count;
-                label1.Text += " contains " + numberOfSelectedDataFiles.ToString() + " data file";
-                if (numberOfSelectedDataFiles > 1)
-                {
-                    label1.Text += "s";
-                }
-
-
-
-            }
-        }
 
         private ParsedJSONFile ParseUsageDataFile(TreeNode node, string fullPath)
         {
