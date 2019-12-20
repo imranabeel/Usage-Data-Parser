@@ -79,6 +79,8 @@
             this.sessionsTableAdapter = new Usage_Data_Parser.HeroUsageDataDataSetTableAdapters.sessionsTableAdapter();
             this.tableAdapterManager = new Usage_Data_Parser.HeroUsageDataDataSetTableAdapters.TableAdapterManager();
             this.touchPointsTableAdapter = new Usage_Data_Parser.HeroUsageDataDataSetTableAdapters.touchPointsTableAdapter();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHandConfig)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.heroUsageDataDataSet)).BeginInit();
@@ -94,6 +96,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.testBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSetBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSet)).BeginInit();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -118,6 +122,9 @@
             // 
             // dataGridViewHandConfig
             // 
+            this.dataGridViewHandConfig.AllowUserToAddRows = false;
+            this.dataGridViewHandConfig.AllowUserToDeleteRows = false;
+            this.dataGridViewHandConfig.AllowUserToOrderColumns = true;
             this.dataGridViewHandConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -148,6 +155,7 @@
             this.dataGridViewHandConfig.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridViewHandConfig.Location = new System.Drawing.Point(5, 6);
             this.dataGridViewHandConfig.Name = "dataGridViewHandConfig";
+            this.dataGridViewHandConfig.ReadOnly = true;
             this.dataGridViewHandConfig.Size = new System.Drawing.Size(933, 436);
             this.dataGridViewHandConfig.TabIndex = 2;
             // 
@@ -156,120 +164,140 @@
             this.sessionIDDataGridViewTextBoxColumn.DataPropertyName = "SessionID";
             this.sessionIDDataGridViewTextBoxColumn.HeaderText = "SessionID";
             this.sessionIDDataGridViewTextBoxColumn.Name = "sessionIDDataGridViewTextBoxColumn";
+            this.sessionIDDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // collectedInTouchPointDataGridViewTextBoxColumn
             // 
             this.collectedInTouchPointDataGridViewTextBoxColumn.DataPropertyName = "CollectedInTouchPoint";
             this.collectedInTouchPointDataGridViewTextBoxColumn.HeaderText = "CollectedInTouchPoint";
             this.collectedInTouchPointDataGridViewTextBoxColumn.Name = "collectedInTouchPointDataGridViewTextBoxColumn";
+            this.collectedInTouchPointDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // sessionNumberDataGridViewTextBoxColumn
             // 
             this.sessionNumberDataGridViewTextBoxColumn.DataPropertyName = "SessionNumber";
             this.sessionNumberDataGridViewTextBoxColumn.HeaderText = "SessionNumber";
             this.sessionNumberDataGridViewTextBoxColumn.Name = "sessionNumberDataGridViewTextBoxColumn";
+            this.sessionNumberDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // handNumberDataGridViewTextBoxColumn
             // 
             this.handNumberDataGridViewTextBoxColumn.DataPropertyName = "HandNumber";
             this.handNumberDataGridViewTextBoxColumn.HeaderText = "HandNumber";
             this.handNumberDataGridViewTextBoxColumn.Name = "handNumberDataGridViewTextBoxColumn";
+            this.handNumberDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // serialNumberDataGridViewTextBoxColumn
             // 
             this.serialNumberDataGridViewTextBoxColumn.DataPropertyName = "serialNumber";
             this.serialNumberDataGridViewTextBoxColumn.HeaderText = "serialNumber";
             this.serialNumberDataGridViewTextBoxColumn.Name = "serialNumberDataGridViewTextBoxColumn";
+            this.serialNumberDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // firmwareVersionDataGridViewTextBoxColumn
             // 
             this.firmwareVersionDataGridViewTextBoxColumn.DataPropertyName = "firmwareVersion";
             this.firmwareVersionDataGridViewTextBoxColumn.HeaderText = "firmwareVersion";
             this.firmwareVersionDataGridViewTextBoxColumn.Name = "firmwareVersionDataGridViewTextBoxColumn";
+            this.firmwareVersionDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // chiralityDataGridViewTextBoxColumn
             // 
             this.chiralityDataGridViewTextBoxColumn.DataPropertyName = "chirality";
             this.chiralityDataGridViewTextBoxColumn.HeaderText = "chirality";
             this.chiralityDataGridViewTextBoxColumn.Name = "chiralityDataGridViewTextBoxColumn";
+            this.chiralityDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // nMotorsDataGridViewTextBoxColumn
             // 
             this.nMotorsDataGridViewTextBoxColumn.DataPropertyName = "nMotors";
             this.nMotorsDataGridViewTextBoxColumn.HeaderText = "nMotors";
             this.nMotorsDataGridViewTextBoxColumn.Name = "nMotorsDataGridViewTextBoxColumn";
+            this.nMotorsDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // resetCauseDataGridViewTextBoxColumn
             // 
             this.resetCauseDataGridViewTextBoxColumn.DataPropertyName = "resetCause";
             this.resetCauseDataGridViewTextBoxColumn.HeaderText = "resetCause";
             this.resetCauseDataGridViewTextBoxColumn.Name = "resetCauseDataGridViewTextBoxColumn";
+            this.resetCauseDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // activeTimeDataGridViewTextBoxColumn
             // 
             this.activeTimeDataGridViewTextBoxColumn.DataPropertyName = "activeTime";
             this.activeTimeDataGridViewTextBoxColumn.HeaderText = "activeTime";
             this.activeTimeDataGridViewTextBoxColumn.Name = "activeTimeDataGridViewTextBoxColumn";
+            this.activeTimeDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // onTimeDataGridViewTextBoxColumn
             // 
             this.onTimeDataGridViewTextBoxColumn.DataPropertyName = "onTime";
             this.onTimeDataGridViewTextBoxColumn.HeaderText = "onTime";
             this.onTimeDataGridViewTextBoxColumn.Name = "onTimeDataGridViewTextBoxColumn";
+            this.onTimeDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // batteryMinVDataGridViewTextBoxColumn
             // 
             this.batteryMinVDataGridViewTextBoxColumn.DataPropertyName = "BatteryMinV";
             this.batteryMinVDataGridViewTextBoxColumn.HeaderText = "BatteryMinV";
             this.batteryMinVDataGridViewTextBoxColumn.Name = "batteryMinVDataGridViewTextBoxColumn";
+            this.batteryMinVDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // batteryMaxVDataGridViewTextBoxColumn
             // 
             this.batteryMaxVDataGridViewTextBoxColumn.DataPropertyName = "BatteryMaxV";
             this.batteryMaxVDataGridViewTextBoxColumn.HeaderText = "BatteryMaxV";
             this.batteryMaxVDataGridViewTextBoxColumn.Name = "batteryMaxVDataGridViewTextBoxColumn";
+            this.batteryMaxVDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // tempMinCDataGridViewTextBoxColumn
             // 
             this.tempMinCDataGridViewTextBoxColumn.DataPropertyName = "TempMinC";
             this.tempMinCDataGridViewTextBoxColumn.HeaderText = "TempMinC";
             this.tempMinCDataGridViewTextBoxColumn.Name = "tempMinCDataGridViewTextBoxColumn";
+            this.tempMinCDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // tempMaxCDataGridViewTextBoxColumn
             // 
             this.tempMaxCDataGridViewTextBoxColumn.DataPropertyName = "TempMaxC";
             this.tempMaxCDataGridViewTextBoxColumn.HeaderText = "TempMaxC";
             this.tempMaxCDataGridViewTextBoxColumn.Name = "tempMaxCDataGridViewTextBoxColumn";
+            this.tempMaxCDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // magMaxXDataGridViewTextBoxColumn
             // 
             this.magMaxXDataGridViewTextBoxColumn.DataPropertyName = "MagMaxX";
             this.magMaxXDataGridViewTextBoxColumn.HeaderText = "MagMaxX";
             this.magMaxXDataGridViewTextBoxColumn.Name = "magMaxXDataGridViewTextBoxColumn";
+            this.magMaxXDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // magMaxYDataGridViewTextBoxColumn
             // 
             this.magMaxYDataGridViewTextBoxColumn.DataPropertyName = "MagMaxY";
             this.magMaxYDataGridViewTextBoxColumn.HeaderText = "MagMaxY";
             this.magMaxYDataGridViewTextBoxColumn.Name = "magMaxYDataGridViewTextBoxColumn";
+            this.magMaxYDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // accelMaxXDataGridViewTextBoxColumn
             // 
             this.accelMaxXDataGridViewTextBoxColumn.DataPropertyName = "AccelMaxX";
             this.accelMaxXDataGridViewTextBoxColumn.HeaderText = "AccelMaxX";
             this.accelMaxXDataGridViewTextBoxColumn.Name = "accelMaxXDataGridViewTextBoxColumn";
+            this.accelMaxXDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // accelMaxYDataGridViewTextBoxColumn
             // 
             this.accelMaxYDataGridViewTextBoxColumn.DataPropertyName = "AccelMaxY";
             this.accelMaxYDataGridViewTextBoxColumn.HeaderText = "AccelMaxY";
             this.accelMaxYDataGridViewTextBoxColumn.Name = "accelMaxYDataGridViewTextBoxColumn";
+            this.accelMaxYDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // accelMaxZDataGridViewTextBoxColumn
             // 
             this.accelMaxZDataGridViewTextBoxColumn.DataPropertyName = "AccelMaxZ";
             this.accelMaxZDataGridViewTextBoxColumn.HeaderText = "AccelMaxZ";
             this.accelMaxZDataGridViewTextBoxColumn.Name = "accelMaxZDataGridViewTextBoxColumn";
+            this.accelMaxZDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // sessionsBindingSource
             // 
@@ -298,6 +326,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(294, 94);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -321,7 +350,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(945, 486);
+            this.tabPage2.Size = new System.Drawing.Size(945, 448);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Touch Points";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -330,6 +359,7 @@
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.AllowUserToOrderColumns = true;
             this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -491,6 +521,32 @@
             // 
             this.touchPointsTableAdapter.ClearBeforeFill = true;
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.dataGridView2);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(945, 448);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Hands";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView2
+            // 
+            this.dataGridView2.AllowUserToAddRows = false;
+            this.dataGridView2.AllowUserToDeleteRows = false;
+            this.dataGridView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView2.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.dataGridView2.Location = new System.Drawing.Point(6, 6);
+            this.dataGridView2.Name = "dataGridView2";
+            this.dataGridView2.ReadOnly = true;
+            this.dataGridView2.Size = new System.Drawing.Size(933, 436);
+            this.dataGridView2.TabIndex = 3;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -522,6 +578,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.testBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSetBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.myFirstDatabaseDataSet)).EndInit();
+            this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -577,6 +635,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn handNumberDataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn touchPointIndexDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn dateDataGridViewTextBoxColumn;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.DataGridView dataGridView2;
     }
 }
 

@@ -85,6 +85,7 @@ namespace Usage_Data_Parser
         }
         private void importSelected_Click(object sender, EventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
             int numberOfSelectedDataFiles = selectedDataFiles.Count;
             if (numberOfSelectedDataFiles > 0)
             {
@@ -215,8 +216,6 @@ namespace Usage_Data_Parser
                         }
                         touchPoints.Add(touchPoint);
                     }
-
-
                 }
 
                 int numberOfNewFiles = newFiles.Count;
@@ -279,6 +278,7 @@ namespace Usage_Data_Parser
                     label1.Text = "No new sessions in selection. No sessions added to the database.";
                 }
             }
+            Cursor.Current = Cursors.Default;
         }
         private void ExportToExcel_Click(object sender, EventArgs e)
         {
