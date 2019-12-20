@@ -110,6 +110,7 @@ namespace Usage_Data_Parser
                         dataGridViewHandConfig.FirstDisplayedScrollingRowIndex = dataGridViewHandConfig.SelectedRows[0].Index;
                         break;
                     }
+                    label1.Text = "Data file not yet imported";
                 }
             }
             else // If the user selects a folder get all the child nodes and add them to a list
@@ -219,17 +220,20 @@ namespace Usage_Data_Parser
                         string touchPoint;
                         if (!sessionFromExistingTouchPoint) // If there are no existing touch points for this session's hand and date, make one.
                         {
-                            // Check to see what the highest existing touch point index is
-                            int? highestExistingIndex = GetHighestTouchPointIndexFromDatabase(handNumber);
-
                             int newTouchPointIndex;
-                            if (highestExistingIndex != null) // If there aren't any for the hand
+
+                            // Check to see what the highest existing touch point index is
+                            bool touchPointExistsForHandInDatabase = TouchPointExistsForHandInDatabase(handNumber);
+                            Console.WriteLine("touch point exists for hand: {0}", touchPointExistsForHandInDatabase.ToString());
+
+                            if (!touchPointExistsForHandInDatabase) // If there aren't any for the hand
                             {
                                 newTouchPointIndex = 1; // Start on 1 as the send out date is 0
                             }
                             else
                             {
-                                newTouchPointIndex = (int)highestExistingIndex + 1; // else use the latest one + 1
+                                int highestExistingIndex = GetHighestTouchPointIndexFromDatabase(handNumber);
+                                newTouchPointIndex = highestExistingIndex + 1; // else use the latest one + 1
                             }
                             touchPoint = handNumber + "_" + newTouchPointIndex.ToString(); // make this this first touch point after the send out (i.e. touch point 1). 
                             AddTouchPointToDatabase(dataCollectionDate, handNumber, touchPoint, newTouchPointIndex);
@@ -502,12 +506,125 @@ namespace Usage_Data_Parser
 
         #region Methods
 
-        private void UpdateTablesFromDatabase()
+        private static SqlConnection EstablishConnectionToSqlDatabase()
         {
-            // TODO: This line of code loads data into the 'heroUsageDataDataSet.touchPoints' table. You can move, or remove it, as needed.
-            touchPointsTableAdapter.Fill(heroUsageDataDataSet.touchPoints);
-            // TODO: This line of code loads data into the 'heroUsageDataDataSet.sessions' table. You can move, or remove it, as needed.
-            sessionsTableAdapter.Fill(heroUsageDataDataSet.sessions);
+            string connectionString;
+            SqlConnection connection;
+            connectionString = @"Data Source=localhost\SQLEXPRESS; Database=HeroUsageData; Integrated Security=True;";
+            connection = new SqlConnection(connectionString);
+            return connection;
+        }
+        
+        private static string GenerateSHA256(string _fullpath)
+        {
+            byte[] hash;
+            using (FileStream stream = File.OpenRead(_fullpath))
+            {
+                var sha265 = SHA256.Create();
+                hash = sha265.ComputeHash(stream);
+            }
+
+            // Convert hash to string for human readability
+            string hashString = "";
+            foreach (byte b in hash)
+            {
+                hashString += b.ToString("x2");
+            }
+
+            return hashString;
+        }
+
+        private static TreeNode CreateDirectoryNode(DirectoryInfo directoryInfo)
+        {
+            var directoryNode = new TreeNode(directoryInfo.Name) { Tag = directoryInfo.FullName };
+            foreach (var directory in directoryInfo.GetDirectories())
+                directoryNode.Nodes.Add(CreateDirectoryNode(directory));
+            foreach (var file in directoryInfo.GetFiles())
+                directoryNode.Nodes.Add(new TreeNode(file.Name) { Tag = file.FullName });
+            return directoryNode;
+        }      
+
+        private bool IsInDataBase(string hashString)
+        {
+            connection.Open();
+            SqlDataReader sessionIdReader;
+            // string query = "SELECT COUNT(1) FROM sessions WHERE SessionID = @SessionID";
+            string query = "SELECT CASE WHEN EXISTS ( SELECT * FROM HeroUsageData.dbo.sessions WHERE SessionID = @SessionID ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END";
+            SqlCommand command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@SessionID", hashString);
+            sessionIdReader = command.ExecuteReader();
+            bool hashIsInDatabase = false;
+            while (sessionIdReader.Read())
+            {
+                hashIsInDatabase = sessionIdReader.GetBoolean(0);
+            }
+            sessionIdReader.Close();
+            command.Dispose();
+            connection.Close();
+            return hashIsInDatabase;
+        }
+
+        private bool IsTouchPointInDatabase(string _handNumber, DateTime _dataCollectionDate)
+        {
+            connection.Open();
+            SqlDataReader touchPointIdReader;
+            // string query = "SELECT COUNT(*) FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber AND Date = @Date";
+            string query = "SELECT CASE WHEN EXISTS ( SELECT * FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber AND Date = @Date ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END";
+            SqlCommand sqlCommand = new SqlCommand(query, connection);
+            sqlCommand.Parameters.AddWithValue("@HandNumber", (object)_handNumber ?? DBNull.Value);
+            sqlCommand.Parameters.AddWithValue("@Date", (object)_dataCollectionDate.Date ?? DBNull.Value);
+            touchPointIdReader = sqlCommand.ExecuteReader();
+            bool existingTouchPoint = false;
+            while (touchPointIdReader.Read())
+            {
+                existingTouchPoint = touchPointIdReader.GetBoolean(0);
+            }
+            touchPointIdReader.Close();
+            sqlCommand.Dispose();
+            connection.Close();
+            return existingTouchPoint;
+        }
+
+        private bool TouchPointExistsForHandInDatabase(string _handNumber)
+        {
+            connection.Open();
+            SqlDataReader sqlDataReader;
+            // string query = "SELECT COUNT(*) FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber";
+            string query = "SELECT CASE WHEN EXISTS ( SELECT * FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END";
+            SqlCommand sqlCommand = new SqlCommand(query, connection);
+            sqlCommand.Parameters.AddWithValue("@HandNumber", (object)_handNumber ?? DBNull.Value);
+            sqlDataReader = sqlCommand.ExecuteReader();
+            bool touchPointExists = false;
+            while (sqlDataReader.Read())
+            {
+                touchPointExists = sqlDataReader.GetBoolean(0);
+            }
+            sqlDataReader.Close();
+            sqlCommand.Dispose();
+            connection.Close();
+            return touchPointExists;
+        }
+
+        private DateTime GetDataCollectionDate(TreeNode node)
+        {
+            TreeNode parent;
+            try
+            {
+                parent = node.Parent;
+            }
+            catch (System.NullReferenceException)
+            {
+                throw;
+            }
+            
+            try
+            {
+                return DateTime.Parse(parent.Text);
+            }
+            catch (System.FormatException)
+            {
+                return GetDataCollectionDate(parent);
+            }
         }
 
         private int GetSessionTouchPointFromDatabase(string _handNumber, DateTime _dataCollectionDate)
@@ -530,138 +647,24 @@ namespace Usage_Data_Parser
             return touchPointIndex;
         }
 
-        private void AddTouchPointToDatabase(DateTime dataCollectionDate, string handNumber, string touchPoint, int newTouchPointIndex)
+        private int GetHighestTouchPointIndexFromDatabase(string handNumber)
         {
             connection.Open();
-            SqlDataAdapter adapter = new SqlDataAdapter();
-            string addTouchPoint = "insert into touchPoints (TouchPointID, HandNumber, TouchPointIndex, Date) values (@TouchPointID, @HandNumber, @TouchPointIndex, @Date)";
-            SqlCommand insertTouchPoint = new SqlCommand(addTouchPoint, connection);
-            insertTouchPoint.Parameters.AddWithValue("@TouchPointID", touchPoint); // Cannot be null
-            insertTouchPoint.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
-            insertTouchPoint.Parameters.AddWithValue("@TouchPointIndex", (object)newTouchPointIndex);
-            insertTouchPoint.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
-            adapter.InsertCommand = insertTouchPoint;
-            adapter.InsertCommand.ExecuteNonQuery();
-            adapter.Dispose();
-            insertTouchPoint.Dispose();
-            connection.Close();
-        }
-
-        private int? GetHighestTouchPointIndexFromDatabase(string handNumber)
-        {
-            connection.Open();
-            SqlDataReader touchPointIdReader;
-            string numberOfMatchingTouchPointsQuery = "SELECT max(TouchPointIndex) FROM touchPoints WHERE HandNumber = @HandNumber";
-            SqlCommand sqlCommand = new SqlCommand(numberOfMatchingTouchPointsQuery, connection);
+            SqlDataReader sqlDataReader;
+            string query = "SELECT max(TouchPointIndex) FROM touchPoints WHERE HandNumber = @HandNumber";
+            SqlCommand sqlCommand = new SqlCommand(query, connection);
             sqlCommand.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
-            touchPointIdReader = sqlCommand.ExecuteReader();
-            int? largestTouchPointIndex = null;
-            while (touchPointIdReader.Read())
+            sqlDataReader = sqlCommand.ExecuteReader();
+            int recieved = -1000;
+            while (sqlDataReader.Read())
             {
-                largestTouchPointIndex = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
+                recieved = sqlDataReader.GetInt32(0);
             }
-            touchPointIdReader.Close();
+            sqlDataReader.Close();
             sqlCommand.Dispose();
             connection.Close();
-            return largestTouchPointIndex;
+            return recieved;
         }
-
-        private bool IsTouchPointInDatabase(string _handNumber, DateTime _dataCollectionDate)
-        {
-            connection.Open();
-            SqlDataReader touchPointIdReader;
-            string numberOfMatchingTouchPointsQuery = "SELECT COUNT(*) FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber AND Date = @Date";
-            SqlCommand sqlCommand = new SqlCommand(numberOfMatchingTouchPointsQuery, connection);
-            sqlCommand.Parameters.AddWithValue("@HandNumber", (object)_handNumber ?? DBNull.Value);
-            sqlCommand.Parameters.AddWithValue("@Date", (object)_dataCollectionDate.Date ?? DBNull.Value);
-            touchPointIdReader = sqlCommand.ExecuteReader();
-            int existingTouchPoint = 0;
-            while (touchPointIdReader.Read())
-            {
-                existingTouchPoint = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
-            }
-            touchPointIdReader.Close();
-            sqlCommand.Dispose();
-            connection.Close();
-            switch (existingTouchPoint)
-            {
-                case 0:
-                    return false;
-                case 1:
-                    return true;
-                default:
-                    WarningException duplicateEntries = new WarningException("Duplicate touch points in Database");
-                    Console.WriteLine(duplicateEntries.ToString());
-                    return true;
-            }
-        }
-
-        private bool IsInDataBase(string hashString)
-        {
-            connection.Open();
-            SqlDataReader sessionIdReader;
-            string numberOfMatchingSessionsQuery = "SELECT COUNT(1) FROM sessions WHERE SessionID = @SessionID";
-            SqlCommand command = new SqlCommand(numberOfMatchingSessionsQuery, connection);
-            command.Parameters.AddWithValue("@SessionID", hashString);
-            sessionIdReader = command.ExecuteReader();
-            String numberOfMatchingSessionHashes = "";
-            while (sessionIdReader.Read())
-            {
-                numberOfMatchingSessionHashes += sessionIdReader.GetValue(0) + "\n";
-            }
-            int numberOfMatchingRecords = Int32.Parse(numberOfMatchingSessionHashes);
-            sessionIdReader.Close();
-            connection.Close();
-
-            switch (numberOfMatchingRecords)
-            {
-                case 0:
-                    return false;
-                case 1:
-                    return true;
-                default:
-                    WarningException duplicateEntries = new WarningException("Duplicate Entries in Database");
-                    Console.WriteLine(duplicateEntries.ToString());
-                    return true;  // TODO;
-            }
-
-        }
-
-        private static string GenerateSHA256(string _fullpath)
-        {
-            byte[] hash;
-            using (FileStream stream = File.OpenRead(_fullpath))
-            {
-                var sha265 = SHA256.Create();
-                hash = sha265.ComputeHash(stream);
-            }
-
-            // Convert hash to string for human readability
-            string hashString = "";
-            foreach (byte b in hash)
-            {
-                hashString += b.ToString("x2");
-            }
-
-            return hashString;
-        }
-
-        private void ListDirectory(TreeView treeView, string path)
-        {
-            treeView.Nodes.Clear();
-            var rootDirectoryInfo = new DirectoryInfo(path);
-            treeView.Nodes.Add(CreateDirectoryNode(rootDirectoryInfo));
-        }
-
-        private static TreeNode CreateDirectoryNode(DirectoryInfo directoryInfo)
-        {
-            var directoryNode = new TreeNode(directoryInfo.Name) { Tag = directoryInfo.FullName };
-            foreach (var directory in directoryInfo.GetDirectories())
-                directoryNode.Nodes.Add(CreateDirectoryNode(directory));
-            foreach (var file in directoryInfo.GetFiles())
-                directoryNode.Nodes.Add(new TreeNode(file.Name) { Tag = file.FullName });
-            return directoryNode;
-        }      
 
         private ParsedJSONFile ParseUsageDataFile(TreeNode node, string fullPath)
         {
@@ -723,35 +726,37 @@ namespace Usage_Data_Parser
             }
         }
 
-        private DateTime GetDataCollectionDate(TreeNode node)
+        private void UpdateTablesFromDatabase()
         {
-            TreeNode parent;
-            try
-            {
-                parent = node.Parent;
-            }
-            catch (System.NullReferenceException)
-            {
-                throw;
-            }
-            
-            try
-            {
-                return DateTime.Parse(parent.Text);
-            }
-            catch (System.FormatException)
-            {
-                return GetDataCollectionDate(parent);
-            }
+            // TODO: This line of code loads data into the 'heroUsageDataDataSet.touchPoints' table. You can move, or remove it, as needed.
+            touchPointsTableAdapter.Fill(heroUsageDataDataSet.touchPoints);
+            // TODO: This line of code loads data into the 'heroUsageDataDataSet.sessions' table. You can move, or remove it, as needed.
+            sessionsTableAdapter.Fill(heroUsageDataDataSet.sessions);
         }
 
-        private static SqlConnection EstablishConnectionToSqlDatabase()
+        private void AddTouchPointToDatabase(DateTime dataCollectionDate, string handNumber, string touchPoint, int newTouchPointIndex)
         {
-            string connectionString;
-            SqlConnection connection;
-            connectionString = @"Data Source=localhost\SQLEXPRESS; Database=HeroUsageData; Integrated Security=True;";
-            connection = new SqlConnection(connectionString);
-            return connection;
+            connection.Open();
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string addTouchPoint = "insert into touchPoints (TouchPointID, HandNumber, TouchPointIndex, Date) values (@TouchPointID, @HandNumber, @TouchPointIndex, @Date)";
+            SqlCommand insertTouchPoint = new SqlCommand(addTouchPoint, connection);
+            insertTouchPoint.Parameters.AddWithValue("@TouchPointID", touchPoint); // Cannot be null
+            insertTouchPoint.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
+            insertTouchPoint.Parameters.AddWithValue("@TouchPointIndex", (object)newTouchPointIndex);
+            insertTouchPoint.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
+            adapter.InsertCommand = insertTouchPoint;
+            adapter.InsertCommand.ExecuteNonQuery();
+            adapter.Dispose();
+            insertTouchPoint.Dispose();
+            connection.Close();
+        }
+
+        private void ListDirectory(TreeView treeView, string path)
+        {
+            treeView.Nodes.Clear();
+            var rootDirectoryInfo = new DirectoryInfo(path);
+            treeView.Nodes.Add(CreateDirectoryNode(rootDirectoryInfo));
+            treeView.Sort();
         }
 
         private void InsertSessionToSQLdatabase(string hashString, string touchPoint, string handNumber, ParsedJSONFile session)
