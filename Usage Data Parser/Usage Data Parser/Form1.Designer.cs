@@ -57,15 +57,15 @@
             this.heroUsageDataDataSet = new Usage_Data_Parser.HeroUsageDataDataSet();
             this.button2 = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.sessions = new System.Windows.Forms.TabPage();
+            this.touchPoints = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.touchPointIDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.handNumberDataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.touchPointIndexDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dateDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.touchPointsBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.hands = new System.Windows.Forms.TabPage();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.summariseSelectedDataButton = new System.Windows.Forms.Button();
@@ -81,11 +81,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.sessionsBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.heroUsageDataDataSet)).BeginInit();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
+            this.sessions.SuspendLayout();
+            this.touchPoints.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.touchPointsBindingSource)).BeginInit();
-            this.tabPage3.SuspendLayout();
+            this.hands.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -317,36 +317,36 @@
             this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.hands);
+            this.tabControl1.Controls.Add(this.touchPoints);
+            this.tabControl1.Controls.Add(this.sessions);
             this.tabControl1.Location = new System.Drawing.Point(294, 94);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(957, 509);
             this.tabControl1.TabIndex = 12;
             // 
-            // tabPage1
+            // sessions
             // 
-            this.tabPage1.Controls.Add(this.dataGridViewHandConfig);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(949, 483);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Sessions";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.sessions.Controls.Add(this.dataGridViewHandConfig);
+            this.sessions.Location = new System.Drawing.Point(4, 22);
+            this.sessions.Name = "sessions";
+            this.sessions.Padding = new System.Windows.Forms.Padding(3);
+            this.sessions.Size = new System.Drawing.Size(949, 483);
+            this.sessions.TabIndex = 0;
+            this.sessions.Text = "Sessions";
+            this.sessions.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
+            // touchPoints
             // 
-            this.tabPage2.Controls.Add(this.dataGridView1);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(945, 448);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Touch Points";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.touchPoints.Controls.Add(this.dataGridView1);
+            this.touchPoints.Location = new System.Drawing.Point(4, 22);
+            this.touchPoints.Name = "touchPoints";
+            this.touchPoints.Padding = new System.Windows.Forms.Padding(3);
+            this.touchPoints.Size = new System.Drawing.Size(949, 483);
+            this.touchPoints.TabIndex = 1;
+            this.touchPoints.Text = "Touch Points";
+            this.touchPoints.UseVisualStyleBackColor = true;
             // 
             // dataGridView1
             // 
@@ -368,7 +368,7 @@
             this.dataGridView1.Location = new System.Drawing.Point(6, 6);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.Size = new System.Drawing.Size(933, 474);
+            this.dataGridView1.Size = new System.Drawing.Size(937, 509);
             this.dataGridView1.TabIndex = 3;
             // 
             // touchPointIDDataGridViewTextBoxColumn
@@ -404,21 +404,22 @@
             this.touchPointsBindingSource.DataMember = "touchPoints";
             this.touchPointsBindingSource.DataSource = this.heroUsageDataDataSet;
             // 
-            // tabPage3
+            // hands
             // 
-            this.tabPage3.Controls.Add(this.dataGridView2);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(949, 483);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Hands";
-            this.tabPage3.UseVisualStyleBackColor = true;
+            this.hands.Controls.Add(this.dataGridView2);
+            this.hands.Location = new System.Drawing.Point(4, 22);
+            this.hands.Name = "hands";
+            this.hands.Padding = new System.Windows.Forms.Padding(3);
+            this.hands.Size = new System.Drawing.Size(949, 483);
+            this.hands.TabIndex = 2;
+            this.hands.Text = "Hands";
+            this.hands.UseVisualStyleBackColor = true;
             // 
             // dataGridView2
             // 
             this.dataGridView2.AllowUserToAddRows = false;
             this.dataGridView2.AllowUserToDeleteRows = false;
+            this.dataGridView2.AllowUserToOrderColumns = true;
             this.dataGridView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -540,11 +541,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.sessionsBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.heroUsageDataDataSet)).EndInit();
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage2.ResumeLayout(false);
+            this.sessions.ResumeLayout(false);
+            this.touchPoints.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.touchPointsBindingSource)).EndInit();
-            this.tabPage3.ResumeLayout(false);
+            this.hands.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
@@ -562,8 +563,8 @@
         private System.Windows.Forms.DataGridView dataGridViewHandConfig;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage sessions;
+        private System.Windows.Forms.TabPage touchPoints;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label1;
@@ -602,7 +603,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn handNumberDataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn touchPointIndexDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn dateDataGridViewTextBoxColumn;
-        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.TabPage hands;
         private System.Windows.Forms.DataGridView dataGridView2;
     }
 }

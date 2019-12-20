@@ -94,16 +94,17 @@ namespace Usage_Data_Parser
 
             // get the file attributes for file or directory
             FileAttributes attr = File.GetAttributes(fullPath);
+            string _fullpath = node.Tag.ToString();
 
             // If the user selects a file
             if (!attr.HasFlag(FileAttributes.Directory))
             {
-                string _fullpath = node.Tag.ToString();
                 string hashString = GenerateSHA256(_fullpath);
                 foreach (DataGridViewRow row in dataGridViewHandConfig.Rows)
                 {
                     if (row.Cells[0].Value.Equals(hashString))
                     {
+                        tabControl1.SelectTab("sessions");
                         dataGridViewHandConfig.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
                         dataGridViewHandConfig.ClearSelection();
                         row.Selected = true;
@@ -133,6 +134,51 @@ namespace Usage_Data_Parser
                 if (numberOfSelectedDataFiles > 1)
                 {
                     label1.Text += "s";
+                }
+
+                string filename = Path.GetFileName(_fullpath);
+                Console.WriteLine("Filename: {0}", filename);
+
+                if (Regex.IsMatch(filename, @"^H[0-9]{1,5}$")) // If it's a hand
+                {
+                    foreach (DataGridViewRow row in dataGridView2.Rows)
+                    {
+                        if (row.Cells[0].Value.Equals(filename))
+                        {
+                            tabControl1.SelectTab("hands");
+                            dataGridView2.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                            dataGridView2.ClearSelection();
+                            Console.WriteLine("row: {0}", row.Index);
+                            if (row.Index > -1) // TODO Not sure why this returns -1 first time around.
+                            {
+                                row.Selected = true;
+                                dataGridView2.FirstDisplayedScrollingRowIndex = dataGridView2.SelectedRows[0].Index;
+                            }
+                            break;
+                        }
+                        label1.Text = "No Data for hand imported";
+                    }
+                }
+
+                if (DateTime.TryParse(filename, out DateTime result)) // If it's a Date
+                {
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    {
+                        if (row.Cells[3].Value.Equals(result))
+                        {
+                            tabControl1.SelectTab("touchPoints");
+                            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                            dataGridView1.ClearSelection();
+                            Console.WriteLine("row: {0}", row.Index);
+                            if (row.Index > -1) // TODO Not sure why this returns -1 first time around.
+                            {
+                                row.Selected = true;
+                                dataGridView1.FirstDisplayedScrollingRowIndex = dataGridView1.SelectedRows[0].Index;
+                            }
+                            break;
+                        }
+                        label1.Text = "No Data for hand imported";
+                    }
                 }
             }
         }
