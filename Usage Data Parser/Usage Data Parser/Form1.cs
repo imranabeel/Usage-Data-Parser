@@ -619,7 +619,7 @@ namespace Usage_Data_Parser
                     }
                     catch (System.NullReferenceException)
                     {
-                        dataCollectionDate = DateTime.MinValue;
+                        continue; 
                     }
                     try
                     {
@@ -627,7 +627,7 @@ namespace Usage_Data_Parser
                     }
                     catch (System.NullReferenceException)
                     {
-                        handNumber = null;
+                        continue; 
                     }
 
                     string _fullpath = _node.Tag.ToString();
@@ -669,6 +669,7 @@ namespace Usage_Data_Parser
                     // If it's not in the database or already set to be inserted
                     if (numberOfMatchingRecords == 0 && !isAlreadyInUpload)
                     {
+                        Console.WriteLine("Parsing file: {0}", _node.Tag.ToString());
                         newHashes.Add(hashString);
                         newHandNumbers.Add(handNumber);
                         newFiles.Add(selectedDataFiles[i]);
@@ -685,24 +686,18 @@ namespace Usage_Data_Parser
                         int index = 0;
                         while (touchPointIdReader.HasRows)
                         {
-                            Console.WriteLine("Result: {0}", touchPointIdReader.GetName(0));
                             while (touchPointIdReader.Read())
                             {
-                                Console.WriteLine("value" + touchPointIdReader.GetValue(0).ToString());
-
                                 existingTouchPoints[index] = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
                                 index++;
                             }
                             touchPointIdReader.NextResult();
                         }
-
-                        Console.WriteLine("latest touch point index for hand: " + existingTouchPoints[0].ToString());
-                        Console.WriteLine("touch points for hand at date exists: " + existingTouchPoints[1].ToString());
                         touchPointIdReader.Close();
                         sqlCommand.Dispose();
                         connection.Close();
                         string touchPoint = "";
-                        if (existingTouchPoints[1] == -1) // If there are no existing touch points for this session's hand and date, make one
+                        if (existingTouchPoints[1] == -1) // If there are no existing touch points for this session's hand and date, make one.
                         {
                             connection.Open();
                             SqlDataAdapter adapter = new SqlDataAdapter();
@@ -747,47 +742,47 @@ namespace Usage_Data_Parser
                     string _fullpath = _node.Tag.ToString();
                     jsonParsedDataFiles[i] = ParseUsageDataFile(_node, _fullpath);
                 }
-                TimeSpan averageActiveTime = TimeSpan.Zero;
-                TimeSpan averageOnTime = TimeSpan.Zero;
-                TimeSpan totalActiveTime = TimeSpan.Zero;
-                TimeSpan totalOnTime = TimeSpan.Zero;
-                int count = 0;
+                //TimeSpan averageActiveTime = TimeSpan.Zero;
+                //TimeSpan averageOnTime = TimeSpan.Zero;
+                //TimeSpan totalActiveTime = TimeSpan.Zero;
+                //TimeSpan totalOnTime = TimeSpan.Zero;
+                //int count = 0;
 
                 for (int i = 0; i < numberOfNewFiles; i++)
                 {
                     ParsedJSONFile file = jsonParsedDataFiles[i];
-                    if (file != null)
-                    {
-                        TimeSpan sessionActiveTime;
-                        TimeSpan sessionOnTime;
-                        if (file.time != null && TimeSpan.TryParse(file.time.activeTime, out sessionActiveTime) && TimeSpan.TryParse(file.time.onTime, out sessionOnTime))
-                        {
-                            totalActiveTime += sessionActiveTime;
-                            totalOnTime += sessionOnTime;
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("File is null");
-                    }
+                    //if (file != null)
+                    //{
+                    //    TimeSpan sessionActiveTime;
+                    //    TimeSpan sessionOnTime;
+                    //    if (file.time != null && TimeSpan.TryParse(file.time.activeTime, out sessionActiveTime) && TimeSpan.TryParse(file.time.onTime, out sessionOnTime))
+                    //    {
+                    //        totalActiveTime += sessionActiveTime;
+                    //        totalOnTime += sessionOnTime;
+                    //        count++;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine("File is null");
+                    //}
 
                     InsertSessionToSQLdatabase(newHashes[i], touchPoints[i], newHandNumbers[i], file);
 
                 }
-                if (count > 0)
-                {
-                    averageActiveTime = TimeSpan.FromTicks(totalActiveTime.Ticks / count);
-                    averageOnTime = TimeSpan.FromTicks(totalOnTime.Ticks / count);
-                }
+                //if (count > 0)
+                //{
+                //    averageActiveTime = TimeSpan.FromTicks(totalActiveTime.Ticks / count);
+                //    averageOnTime = TimeSpan.FromTicks(totalOnTime.Ticks / count);
+                //}
 
-                string averageActiveTimeString = averageActiveTime.ToString("g");
-                string averageOnTimeString = averageOnTime.ToString("g");
-                string totalActiveTimeString = totalActiveTime.ToString("g");
-                string totalOnTimeString = totalOnTime.ToString("g");
-                string total_m_traveled = ((float)totalActiveTime.Seconds * 23f / 1000f).ToString("g"); //23 mm per second at no load.
+                //string averageActiveTimeString = averageActiveTime.ToString("g");
+                //string averageOnTimeString = averageOnTime.ToString("g");
+                //string totalActiveTimeString = totalActiveTime.ToString("g");
+                //string totalOnTimeString = totalOnTime.ToString("g");
+                //string total_m_traveled = ((float)totalActiveTime.Seconds * 23f / 1000f).ToString("g"); //23 mm per second at no load.
 
-                DisplaySummarisedData(count, averageOnTimeString, averageActiveTimeString, totalOnTimeString, totalActiveTimeString, total_m_traveled);
+                //DisplaySummarisedData(count, averageOnTimeString, averageActiveTimeString, totalOnTimeString, totalActiveTimeString, total_m_traveled);
 
                 if (numberOfNewFiles > 0)
                 {
@@ -903,7 +898,7 @@ namespace Usage_Data_Parser
                 "@AccelMaxY, " +
                 "@AccelMaxZ)";
             SqlCommand command = new SqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@SessionID", hashString);
+            command.Parameters.AddWithValue("@SessionID", hashString); // Cannot be null
             command.Parameters.AddWithValue("@CollectedInTouchPoint", (object)touchPoint ?? DBNull.Value);
             command.Parameters.AddWithValue("@SessionNumber", session.sessionN); // Cannot be null
             command.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
@@ -912,17 +907,17 @@ namespace Usage_Data_Parser
             command.Parameters.AddWithValue("@chirality", session.handConfig != null ? (object)session.handConfig.chirality : DBNull.Value);
             command.Parameters.AddWithValue("@nMotors", session.handConfig != null? (object)session.handConfig.nMotors : DBNull.Value);
             command.Parameters.AddWithValue("@resetCause", (object)session.resetCause ?? DBNull.Value);
-            command.Parameters.AddWithValue("@activeTime", session.time != null ? (object)TimeSpan.Parse(session.time.activeTime) : DBNull.Value);
-            command.Parameters.AddWithValue("@onTime", session.time != null ? (object)TimeSpan.Parse(session.time.onTime) : DBNull.Value);
-            command.Parameters.AddWithValue("@BatteryMinV", session.battery != null ? (object)Single.Parse(session.battery.min.battV) : DBNull.Value);
-            command.Parameters.AddWithValue("@BatteryMaxV", session.battery != null ? (object)Single.Parse(session.battery.max.battV) : DBNull.Value);
-            command.Parameters.AddWithValue("@TempMinC", session.temp != null ? (object)Single.Parse(session.temp.minTemp.tempC) : DBNull.Value);
-            command.Parameters.AddWithValue("@TempMaxC", session.temp != null ? (object)Single.Parse(session.temp.maxTemp.tempC) : DBNull.Value);
-            command.Parameters.AddWithValue("@MagMaxX", session.magFlux != null ? (object)Single.Parse(session.magFlux.X.max) : DBNull.Value);
-            command.Parameters.AddWithValue("@MagMaxY", session.magFlux != null ? (object)Single.Parse(session.magFlux.Y.max) : DBNull.Value);
-            command.Parameters.AddWithValue("@AccelMaxX", session.accel != null ? (object)Single.Parse(session.accel.X.max) : DBNull.Value);
-            command.Parameters.AddWithValue("@AccelMaxY", session.accel != null ? (object)Single.Parse(session.accel.Y.max) : DBNull.Value);
-            command.Parameters.AddWithValue("@AccelMaxZ", session.accel != null ? (object)Single.Parse(session.accel.Z.max) : DBNull.Value);
+            command.Parameters.AddWithValue("@activeTime", session.time != null && TimeSpan.TryParse(session.time.activeTime, out TimeSpan activeTime) ? (object)activeTime : DBNull.Value);
+            command.Parameters.AddWithValue("@onTime", session.time != null && TimeSpan.TryParse(session.time.onTime, out TimeSpan onTime) ? (object)onTime : DBNull.Value);
+            command.Parameters.AddWithValue("@BatteryMinV", session.battery != null && Single.TryParse(session.battery.min.battV, out float battMin) ? (object)battMin : DBNull.Value);
+            command.Parameters.AddWithValue("@BatteryMaxV", session.battery != null && Single.TryParse(session.battery.max.battV, out float battMax) ? (object)battMax : DBNull.Value);
+            command.Parameters.AddWithValue("@TempMinC", session.temp != null && Single.TryParse(session.temp.minTemp.tempC, out float minTemp) ? (object)minTemp : DBNull.Value);
+            command.Parameters.AddWithValue("@TempMaxC", session.temp != null && Single.TryParse(session.temp.maxTemp.tempC, out float maxTemp) ? (object)maxTemp : DBNull.Value);
+            command.Parameters.AddWithValue("@MagMaxX", session.magFlux != null && Single.TryParse(session.magFlux.X.max, out float maxMagX) ? (object)maxMagX : DBNull.Value);
+            command.Parameters.AddWithValue("@MagMaxY", session.magFlux != null && Single.TryParse(session.magFlux.Y.max, out float maxMagY) ? (object)maxMagY : DBNull.Value);
+            command.Parameters.AddWithValue("@AccelMaxX", session.accel != null && Single.TryParse(session.accel.X.max, out float maxAccX) ? (object)maxAccX : DBNull.Value);
+            command.Parameters.AddWithValue("@AccelMaxY", session.accel != null && Single.TryParse(session.accel.Y.max, out float maxAccY) ? (object)maxAccY : DBNull.Value);
+            command.Parameters.AddWithValue("@AccelMaxZ", session.accel != null && Single.TryParse(session.accel.Z.max, out float maxAccZ) ? (object)maxAccZ : DBNull.Value);
             adapter.InsertCommand = command;
             adapter.InsertCommand.ExecuteNonQuery();
             connection.Close();
