@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -19,21 +20,30 @@ namespace Usage_Data_Parser
     {
 
         #region Constant Fields
+
         #endregion
+
         #region Fields
+
         private SqlConnection connection;
         private List<ParsedJSONFile> parsedFiles = new List<ParsedJSONFile>();
         private List<TreeNode> selectedDataFiles = new List<TreeNode>();
         private TreeNode oldNode;
         private string rootNodePath = "";
+        
         #endregion
+
         #region Constructors
+
         public Form1()
         {
             InitializeComponent();
         }
+
         #endregion
+
         #region Events
+
         private void Form1_Load(object sender, EventArgs e)
         {
             // TODO: This line of code loads data into the 'heroUsageDataDataSet.touchPoints' table. You can move, or remove it, as needed.
@@ -56,6 +66,7 @@ namespace Usage_Data_Parser
             connection = EstablishConnectionToSqlDatabase();
 
         }
+
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (rootNodePath != "" & rootNodePath != null)
@@ -64,6 +75,7 @@ namespace Usage_Data_Parser
                 Properties.Settings.Default.Save();
             }
         }
+
         private void folderSelectButton_Click(object sender, EventArgs e)
         {
             using (var directoryDialog = new CommonOpenFileDialog
@@ -83,30 +95,34 @@ namespace Usage_Data_Parser
                 }
             }
         }
+
         private void importSelected_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             int numberOfSelectedDataFiles = selectedDataFiles.Count;
+            Console.WriteLine("number of selected files: {0}", numberOfSelectedDataFiles);
             if (numberOfSelectedDataFiles > 0)
             {
                 List<TreeNode> newFiles = new List<TreeNode>();
                 List<String> newHashes = new List<String>();
                 List<String> touchPoints = new List<String>();
                 List<String> newHandNumbers = new List<String>();
-
-                
+                                
                 for (int i = 0; i < numberOfSelectedDataFiles; i++)
                 {
                     TreeNode _node = selectedDataFiles[i];
+                    string _fullpath = _node.Tag.ToString();
                     DateTime dataCollectionDate;
                     string handNumber;
+
+                    // Try to get the session collection date and hand number, else skip it
                     try
                     {
                         dataCollectionDate = GetDataCollectionDate(_node);
                     }
                     catch (System.NullReferenceException)
                     {
-                        continue; 
+                        continue;
                     }
                     try
                     {
@@ -114,161 +130,70 @@ namespace Usage_Data_Parser
                     }
                     catch (System.NullReferenceException)
                     {
-                        continue; 
+                        continue;
                     }
 
-                    string _fullpath = _node.Tag.ToString();
-                    byte[] hash;
-                    using (FileStream stream = File.OpenRead(_fullpath))
-                    {
-                        var sha265 = SHA256.Create();
-                        hash = sha265.ComputeHash(stream);
-                    }
-
-                    // Convert hash to string for human readability
-                    string hashString = "";
-                    foreach (byte b in hash)
-                    {
-                        hashString += b.ToString("x2");
-                    }
-
+                    // Compute the hash
+                    string hashString = GenerateSHA256(_fullpath);
+                    Console.WriteLine("hash: {0}", hashString);
 
                     // Search to see if the record already exists
-                    connection.Open();
-                    SqlDataReader sessionIdReader;
-                    string numberOfMatchingSessionsQuery = "SELECT COUNT(1) FROM sessions WHERE SessionID = @SessionID";
-                    SqlCommand command = new SqlCommand(numberOfMatchingSessionsQuery, connection);
-                    command.Parameters.AddWithValue("@SessionID", hashString);
-                    sessionIdReader = command.ExecuteReader();
-                    String numberOfMatchingSessionHashes = "";
-                    while (sessionIdReader.Read())
-                    {
-                        numberOfMatchingSessionHashes += sessionIdReader.GetValue(0) + "\n";
-                    }
-                    int numberOfMatchingRecords = Int32.Parse(numberOfMatchingSessionHashes);
-                    sessionIdReader.Close();
-                    connection.Close();
+                    bool inDatabase = IsInDataBase(hashString);
+                    Console.WriteLine("is in database: {0}", inDatabase.ToString());
 
                     // If there is a duplicate of a record in the selected files, it won't be in the database yet
                     // so each will pass the check. Therefore they list to add is also checked for duplicates
                     bool isAlreadyInUpload = newHashes.Contains(hashString);
+                    Console.WriteLine("is in list to add: {0}", isAlreadyInUpload.ToString());
 
                     // If it's not in the database or already set to be inserted
-                    if (numberOfMatchingRecords == 0 && !isAlreadyInUpload)
+                    if (!inDatabase && !isAlreadyInUpload)
                     {
-                        Console.WriteLine("Parsing file: {0}", _node.Tag.ToString());
                         newHashes.Add(hashString);
                         newHandNumbers.Add(handNumber);
                         newFiles.Add(selectedDataFiles[i]);
 
-                        connection.Open();
-                        SqlDataReader touchPointIdReader;
-                        string numberOfMatchingTouchPointsQuery = "SELECT max(TouchPointIndex) as [Highest Index] FROM touchPoints WHERE HandNumber = @HandNumber ; " +
-                            "SELECT TouchPointIndex AS 'Exists' FROM touchPoints WHERE HandNumber = @HandNumber AND Date = @Date";
-                        SqlCommand sqlCommand = new SqlCommand(numberOfMatchingTouchPointsQuery, connection);
-                        sqlCommand.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
-                        sqlCommand.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
-                        touchPointIdReader = sqlCommand.ExecuteReader();
-                        int[] existingTouchPoints = new int[2] { -1, -1 }; // [0] = highest index of touch points for the hand in question (i.e count - 1). [1] = Does a touchpoint exist for this date?
-                        int index = 0;
-                        while (touchPointIdReader.HasRows)
+                        // Check to see if this new entry is from an existing touch point.
+                        bool sessionFromExistingTouchPoint = IsTouchPointInDatabase(handNumber, dataCollectionDate);
+
+                        string touchPoint;
+                        if (!sessionFromExistingTouchPoint) // If there are no existing touch points for this session's hand and date, make one.
                         {
-                            while (touchPointIdReader.Read())
-                            {
-                                existingTouchPoints[index] = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
-                                index++;
-                            }
-                            touchPointIdReader.NextResult();
-                        }
-                        touchPointIdReader.Close();
-                        sqlCommand.Dispose();
-                        connection.Close();
-                        string touchPoint = "";
-                        if (existingTouchPoints[1] == -1) // If there are no existing touch points for this session's hand and date, make one.
-                        {
-                            connection.Open();
-                            SqlDataAdapter adapter = new SqlDataAdapter();
+                            // Check to see what the highest existing touch point index is
+                            int? highestExistingIndex = GetHighestTouchPointIndexFromDatabase(handNumber);
+
                             int newTouchPointIndex;
-                            if (existingTouchPoints[0] == -1) // If there aren't any for the hand
+                            if (highestExistingIndex != null) // If there aren't any for the hand
                             {
                                 newTouchPointIndex = 1; // Start on 1 as the send out date is 0
                             }
                             else
                             {
-                                newTouchPointIndex = existingTouchPoints[0] + 1; // else use the latest one + 1
+                                newTouchPointIndex = (int)highestExistingIndex + 1; // else use the latest one + 1
                             }
                             touchPoint = handNumber + "_" + newTouchPointIndex.ToString(); // make this this first touch point after the send out (i.e. touch point 1). 
-                            string addTouchPoint = "insert into touchPoints (TouchPointID, HandNumber, TouchPointIndex, Date) values (@TouchPointID, @HandNumber, @TouchPointIndex, @Date)";
-                            SqlCommand insertTouchPoint = new SqlCommand(addTouchPoint, connection);
-                            insertTouchPoint.Parameters.AddWithValue("@TouchPointID", touchPoint); // Cannot be null
-                            insertTouchPoint.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
-                            insertTouchPoint.Parameters.AddWithValue("@TouchPointIndex", (object)newTouchPointIndex);
-                            insertTouchPoint.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
-                            adapter.InsertCommand = insertTouchPoint;
-                            adapter.InsertCommand.ExecuteNonQuery();
-                            adapter.Dispose();
-                            insertTouchPoint.Dispose();
-                            connection.Close();
+                            AddTouchPointToDatabase(dataCollectionDate, handNumber, touchPoint, newTouchPointIndex);
                         }
                         else
                         {
-                            touchPoint = handNumber + "_" + existingTouchPoints[1]; // Set it to the matching touchpoint
+                            int sessionTouchPoint = GetSessionTouchPointFromDatabase(handNumber, dataCollectionDate);
+                            touchPoint = handNumber + "_" + sessionTouchPoint.ToString(); // Set it to the matching touchpoint
                         }
                         touchPoints.Add(touchPoint);
                     }
                 }
 
+                // Add the files identified as new
                 int numberOfNewFiles = newFiles.Count;
-                ParsedJSONFile[] jsonParsedDataFiles = new ParsedJSONFile[numberOfNewFiles];
                 for (int i = 0; i < numberOfNewFiles; i++)
                 {
                     label1.Text = "Adding session " + i.ToString() + " of " + numberOfNewFiles.ToString() + ".";
                     TreeNode _node = newFiles[i];
                     string _fullpath = _node.Tag.ToString();
-                    jsonParsedDataFiles[i] = ParseUsageDataFile(_node, _fullpath);
-                }
-                //TimeSpan averageActiveTime = TimeSpan.Zero;
-                //TimeSpan averageOnTime = TimeSpan.Zero;
-                //TimeSpan totalActiveTime = TimeSpan.Zero;
-                //TimeSpan totalOnTime = TimeSpan.Zero;
-                //int count = 0;
-
-                for (int i = 0; i < numberOfNewFiles; i++)
-                {
-                    ParsedJSONFile file = jsonParsedDataFiles[i];
-                    //if (file != null)
-                    //{
-                    //    TimeSpan sessionActiveTime;
-                    //    TimeSpan sessionOnTime;
-                    //    if (file.time != null && TimeSpan.TryParse(file.time.activeTime, out sessionActiveTime) && TimeSpan.TryParse(file.time.onTime, out sessionOnTime))
-                    //    {
-                    //        totalActiveTime += sessionActiveTime;
-                    //        totalOnTime += sessionOnTime;
-                    //        count++;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    Console.WriteLine("File is null");
-                    //}
-
+                    ParsedJSONFile file = ParseUsageDataFile(_node, _fullpath);
                     InsertSessionToSQLdatabase(newHashes[i], touchPoints[i], newHandNumbers[i], file);
-
                 }
-                //if (count > 0)
-                //{
-                //    averageActiveTime = TimeSpan.FromTicks(totalActiveTime.Ticks / count);
-                //    averageOnTime = TimeSpan.FromTicks(totalOnTime.Ticks / count);
-                //}
-
-                //string averageActiveTimeString = averageActiveTime.ToString("g");
-                //string averageOnTimeString = averageOnTime.ToString("g");
-                //string totalActiveTimeString = totalActiveTime.ToString("g");
-                //string totalOnTimeString = totalOnTime.ToString("g");
-                //string total_m_traveled = ((float)totalActiveTime.Seconds * 23f / 1000f).ToString("g"); //23 mm per second at no load.
-
-                //DisplaySummarisedData(count, averageOnTimeString, averageActiveTimeString, totalOnTimeString, totalActiveTimeString, total_m_traveled);
-
+                Console.WriteLine("number of new files: {0}", numberOfNewFiles);
                 if (numberOfNewFiles > 0)
                 {
                     label1.Text = numberOfNewFiles.ToString() + " sessions added to the database.";
@@ -280,6 +205,7 @@ namespace Usage_Data_Parser
             }
             Cursor.Current = Cursors.Default;
         }
+
         private void ExportToExcel_Click(object sender, EventArgs e)
         {
             var node = treeView1.SelectedNode;
@@ -510,14 +436,153 @@ namespace Usage_Data_Parser
                 }
             }
         }
+
         #endregion
+
         #region Methods
+        private int GetSessionTouchPointFromDatabase(string _handNumber, DateTime _dataCollectionDate)
+        {
+            connection.Open();
+            SqlDataReader touchPointIdReader;
+            string touchPointIDQuery = "SELECT TouchPointIndex FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber AND Date = @Date";
+            SqlCommand sqlCommand = new SqlCommand(touchPointIDQuery, connection);
+            sqlCommand.Parameters.AddWithValue("@HandNumber", (object)_handNumber ?? DBNull.Value);
+            sqlCommand.Parameters.AddWithValue("@Date", (object)_dataCollectionDate.Date ?? DBNull.Value);
+            touchPointIdReader = sqlCommand.ExecuteReader();
+            int touchPointIndex = -1;
+            while (touchPointIdReader.Read())
+            {
+                touchPointIndex = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
+            }
+            touchPointIdReader.Close();
+            sqlCommand.Dispose();
+            connection.Close();
+            return touchPointIndex;
+        }
+
+        private void AddTouchPointToDatabase(DateTime dataCollectionDate, string handNumber, string touchPoint, int newTouchPointIndex)
+        {
+            connection.Open();
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            string addTouchPoint = "insert into touchPoints (TouchPointID, HandNumber, TouchPointIndex, Date) values (@TouchPointID, @HandNumber, @TouchPointIndex, @Date)";
+            SqlCommand insertTouchPoint = new SqlCommand(addTouchPoint, connection);
+            insertTouchPoint.Parameters.AddWithValue("@TouchPointID", touchPoint); // Cannot be null
+            insertTouchPoint.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
+            insertTouchPoint.Parameters.AddWithValue("@TouchPointIndex", (object)newTouchPointIndex);
+            insertTouchPoint.Parameters.AddWithValue("@Date", (object)dataCollectionDate.Date ?? DBNull.Value);
+            adapter.InsertCommand = insertTouchPoint;
+            adapter.InsertCommand.ExecuteNonQuery();
+            adapter.Dispose();
+            insertTouchPoint.Dispose();
+            connection.Close();
+        }
+
+        private int? GetHighestTouchPointIndexFromDatabase(string handNumber)
+        {
+            connection.Open();
+            SqlDataReader touchPointIdReader;
+            string numberOfMatchingTouchPointsQuery = "SELECT max(TouchPointIndex) FROM touchPoints WHERE HandNumber = @HandNumber";
+            SqlCommand sqlCommand = new SqlCommand(numberOfMatchingTouchPointsQuery, connection);
+            sqlCommand.Parameters.AddWithValue("@HandNumber", (object)handNumber ?? DBNull.Value);
+            touchPointIdReader = sqlCommand.ExecuteReader();
+            int? largestTouchPointIndex = null;
+            while (touchPointIdReader.Read())
+            {
+                largestTouchPointIndex = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
+            }
+            touchPointIdReader.Close();
+            sqlCommand.Dispose();
+            connection.Close();
+            return largestTouchPointIndex;
+        }
+
+        private bool IsTouchPointInDatabase(string _handNumber, DateTime _dataCollectionDate)
+        {
+            connection.Open();
+            SqlDataReader touchPointIdReader;
+            string numberOfMatchingTouchPointsQuery = "SELECT COUNT(*) FROM HeroUsageData.dbo.touchPoints WHERE HandNumber = @HandNumber AND Date = @Date";
+            SqlCommand sqlCommand = new SqlCommand(numberOfMatchingTouchPointsQuery, connection);
+            sqlCommand.Parameters.AddWithValue("@HandNumber", (object)_handNumber ?? DBNull.Value);
+            sqlCommand.Parameters.AddWithValue("@Date", (object)_dataCollectionDate.Date ?? DBNull.Value);
+            touchPointIdReader = sqlCommand.ExecuteReader();
+            int existingTouchPoint = 0;
+            while (touchPointIdReader.Read())
+            {
+                existingTouchPoint = touchPointIdReader.GetValue(0) != DBNull.Value ? (int)touchPointIdReader.GetValue(0) : -1;
+            }
+            touchPointIdReader.Close();
+            sqlCommand.Dispose();
+            connection.Close();
+            switch (existingTouchPoint)
+            {
+                case 0:
+                    return false;
+                case 1:
+                    return true;
+                default:
+                    WarningException duplicateEntries = new WarningException("Duplicate touch points in Database");
+                    Console.WriteLine(duplicateEntries.ToString());
+                    return true;
+            }
+        }
+
+        private bool IsInDataBase(string hashString)
+        {
+            connection.Open();
+            SqlDataReader sessionIdReader;
+            string numberOfMatchingSessionsQuery = "SELECT COUNT(1) FROM sessions WHERE SessionID = @SessionID";
+            SqlCommand command = new SqlCommand(numberOfMatchingSessionsQuery, connection);
+            command.Parameters.AddWithValue("@SessionID", hashString);
+            sessionIdReader = command.ExecuteReader();
+            String numberOfMatchingSessionHashes = "";
+            while (sessionIdReader.Read())
+            {
+                numberOfMatchingSessionHashes += sessionIdReader.GetValue(0) + "\n";
+            }
+            int numberOfMatchingRecords = Int32.Parse(numberOfMatchingSessionHashes);
+            sessionIdReader.Close();
+            connection.Close();
+
+            switch (numberOfMatchingRecords)
+            {
+                case 0:
+                    return false;
+                case 1:
+                    return true;
+                default:
+                    WarningException duplicateEntries = new WarningException("Duplicate Entries in Database");
+                    Console.WriteLine(duplicateEntries.ToString());
+                    return true;  // TODO;
+            }
+
+        }
+
+        private static string GenerateSHA256(string _fullpath)
+        {
+            byte[] hash;
+            using (FileStream stream = File.OpenRead(_fullpath))
+            {
+                var sha265 = SHA256.Create();
+                hash = sha265.ComputeHash(stream);
+            }
+
+            // Convert hash to string for human readability
+            string hashString = "";
+            foreach (byte b in hash)
+            {
+                hashString += b.ToString("x2");
+            }
+
+            return hashString;
+        }
+
         private void ListDirectory(TreeView treeView, string path)
         {
             treeView.Nodes.Clear();
             var rootDirectoryInfo = new DirectoryInfo(path);
             treeView.Nodes.Add(CreateDirectoryNode(rootDirectoryInfo));
         }
+
         private static TreeNode CreateDirectoryNode(DirectoryInfo directoryInfo)
         {
             var directoryNode = new TreeNode(directoryInfo.Name) { Tag = directoryInfo.FullName };
@@ -527,6 +592,7 @@ namespace Usage_Data_Parser
                 directoryNode.Nodes.Add(new TreeNode(file.Name) { Tag = file.FullName });
             return directoryNode;
         }      
+
         private void FileFolderSelected(object sender, TreeViewEventArgs e)
         {
             //ClearDataGrids();
@@ -587,6 +653,7 @@ namespace Usage_Data_Parser
 
             }
         }
+
         private ParsedJSONFile ParseUsageDataFile(TreeNode node, string fullPath)
         {
             ParsedJSONFile _jsonParsedData;
@@ -621,6 +688,7 @@ namespace Usage_Data_Parser
             return _jsonParsedData;
 
         }
+
         private string GetHandNumber(TreeNode node)
         {
             TreeNode parent;
@@ -645,6 +713,7 @@ namespace Usage_Data_Parser
                 return GetHandNumber(parent);
             }
         }
+
         private DateTime GetDataCollectionDate(TreeNode node)
         {
             TreeNode parent;
@@ -666,6 +735,7 @@ namespace Usage_Data_Parser
                 return GetDataCollectionDate(parent);
             }
         }
+
         private static SqlConnection EstablishConnectionToSqlDatabase()
         {
             string connectionString;
@@ -674,6 +744,7 @@ namespace Usage_Data_Parser
             connection = new SqlConnection(connectionString);
             return connection;
         }
+
         private void InsertSessionToSQLdatabase(string hashString, string touchPoint, string handNumber, ParsedJSONFile session)
         {
             connection.Open();
