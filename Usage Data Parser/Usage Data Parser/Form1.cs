@@ -46,10 +46,7 @@ namespace Usage_Data_Parser
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // TODO: This line of code loads data into the 'heroUsageDataDataSet.touchPoints' table. You can move, or remove it, as needed.
-            touchPointsTableAdapter.Fill(heroUsageDataDataSet.touchPoints);
-            // TODO: This line of code loads data into the 'heroUsageDataDataSet.sessions' table. You can move, or remove it, as needed.
-            sessionsTableAdapter.Fill(heroUsageDataDataSet.sessions);
+            UpdateTablesFromDatabase();
 
             Text += " v" + Version.getVersion(); // Add the version number to the window title bar
 
@@ -66,7 +63,7 @@ namespace Usage_Data_Parser
             connection = EstablishConnectionToSqlDatabase();
 
         }
-
+        
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (rootNodePath != "" & rootNodePath != null)
@@ -204,6 +201,7 @@ namespace Usage_Data_Parser
                 }
             }
             Cursor.Current = Cursors.Default;
+            UpdateTablesFromDatabase();
         }
 
         private void ExportToExcel_Click(object sender, EventArgs e)
@@ -440,6 +438,15 @@ namespace Usage_Data_Parser
         #endregion
 
         #region Methods
+
+        private void UpdateTablesFromDatabase()
+        {
+            // TODO: This line of code loads data into the 'heroUsageDataDataSet.touchPoints' table. You can move, or remove it, as needed.
+            touchPointsTableAdapter.Fill(heroUsageDataDataSet.touchPoints);
+            // TODO: This line of code loads data into the 'heroUsageDataDataSet.sessions' table. You can move, or remove it, as needed.
+            sessionsTableAdapter.Fill(heroUsageDataDataSet.sessions);
+        }
+
         private int GetSessionTouchPointFromDatabase(string _handNumber, DateTime _dataCollectionDate)
         {
             connection.Open();
