@@ -22,9 +22,9 @@ SELECT
 FROM HeroUsageData.dbo.sessions GROUP BY CollectedInTouchPoint
 
 SELECT
-	a.TouchPointID,
-	a.HandNumber,
-	a.Date, 
+	a.TouchPointID AS [Touch Point ID],
+	a.HandNumber AS [Hand Number],
+	a.Date AS [Date], 
 	a.[Number of Days], 
 	b.[Total On Time (s)],
 	b.[Total Active Time (s)],
@@ -42,12 +42,12 @@ SELECT * FROM #temp3
 */
 
 SELECT
-	HandNumber,
+	[Hand Number],
 	SUM([Total On Time (s)]) AS [Total On Time (s)],
 	SUM([Total Active Time (s)]) AS [Total Active Time (s)],
-	SUM([Metres Traveled]),
+	SUM([Metres Traveled]) AS [Total Metres Travelled],
 	CONVERT(DECIMAL(10,2), AVG([Average On Time Per Day (s)])) AS [Average On Time Per Day (s)],
 	CONVERT(DECIMAL(10,2), AVG([Average Active Time Per Day (s)])) AS [Average Active Time Per Day (s)],
 	CONVERT(DECIMAL(10,2), AVG([Average Metres Traveled Per Day])) AS [Average Distance Traveled Per Day (m)]
 FROM #temp3
-GROUP BY HandNumber
+GROUP BY [Hand Number]

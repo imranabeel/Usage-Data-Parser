@@ -410,7 +410,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(945, 448);
+            this.tabPage3.Size = new System.Drawing.Size(949, 483);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Hands";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -427,7 +427,7 @@
             this.dataGridView2.Location = new System.Drawing.Point(6, 6);
             this.dataGridView2.Name = "dataGridView2";
             this.dataGridView2.ReadOnly = true;
-            this.dataGridView2.Size = new System.Drawing.Size(933, 436);
+            this.dataGridView2.Size = new System.Drawing.Size(937, 471);
             this.dataGridView2.TabIndex = 3;
             // 
             // groupBox1

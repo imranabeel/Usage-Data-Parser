@@ -46,7 +46,6 @@ namespace Usage_Data_Parser
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            UpdateTablesFromDatabase();
 
             Text += " v" + Version.getVersion(); // Add the version number to the window title bar
 
@@ -62,6 +61,7 @@ namespace Usage_Data_Parser
             //Establish Connection to database
             connection = EstablishConnectionToSqlDatabase();
 
+            UpdateTablesFromDatabase();
         }
         
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -728,10 +728,55 @@ namespace Usage_Data_Parser
 
         private void UpdateTablesFromDatabase()
         {
-            // TODO: This line of code loads data into the 'heroUsageDataDataSet.touchPoints' table. You can move, or remove it, as needed.
             touchPointsTableAdapter.Fill(heroUsageDataDataSet.touchPoints);
-            // TODO: This line of code loads data into the 'heroUsageDataDataSet.sessions' table. You can move, or remove it, as needed.
             sessionsTableAdapter.Fill(heroUsageDataDataSet.sessions);
+
+            connection.Open();
+            SqlDataReader sqlDataReader;
+            // string query = "SELECT COUNT(1) FROM sessions WHERE SessionID = @SessionID";
+            string query = "DROP TABLE IF EXISTS #temp1;" +
+                "DROP TABLE IF EXISTS #temp2;" +
+                "DROP TABLE IF EXISTS #temp3;" +
+                "SELECT TouchPointID, HandNumber, Date, " +
+                "DATEDIFF(DAY,LAG(Date, 1) OVER(PARTITION BY HandNumber ORDER BY Date),Date) AS [Number of Days]" +
+                "INTO #temp1 " +
+                "FROM HeroUsageData.dbo.touchPoints " +
+                "ORDER BY HandNumber, Date;" +
+                "SELECT CollectedInTouchPoint, " +
+                "SUM(DATEDIFF(second, '0:00:00', onTime)) AS [Total On Time (s)], " +
+                "SUM(DATEDIFF(second, '0:00:00', activeTime)) AS [Total Active Time (s)] " +
+                "INTO #temp2 " +
+                "FROM HeroUsageData.dbo.sessions GROUP BY CollectedInTouchPoint;" +
+                "SELECT a.TouchPointID AS [Touch Point ID]," +
+                "a.HandNumber AS [Hand Number]," +
+                "a.Date AS [Date], " +
+                "a.[Number of Days], " +
+                "b.[Total On Time (s)], " +
+                "b.[Total Active Time (s)], " +
+                "CAST(b.[Total Active Time (s)] as float) * 23 / 1000 AS [Metres Traveled], " +
+                "CAST(b.[Total On Time (s)] AS float)/CAST(a.[Number of Days] AS float) AS [Average On Time Per Day (s)], " +
+                "CAST(b.[Total Active Time (s)] AS float)/CAST(a.[Number of Days] AS float) AS [Average Active Time Per Day (s)], " +
+                "CAST(b.[Total Active Time (s)] as float) * 23 / 1000 / a.[Number of Days] AS [Average Metres Traveled Per Day] " +
+                "INTO #temp3 " +
+                "FROM #temp1 a JOIN #temp2 b ON a.TouchPointID=b.CollectedInTouchPoint; " +
+                "SELECT [Hand Number], " +
+                "SUM([Total On Time (s)]) AS [Total On Time (s)], " +
+                "SUM([Total Active Time (s)]) AS [Total Active Time (s)], " +
+                "SUM([Metres Traveled]) AS [Total Metres Travelled], " +
+                "CONVERT(DECIMAL(10,2), AVG([Average On Time Per Day (s)])) AS [Average On Time Per Day (s)], " +
+                "CONVERT(DECIMAL(10,2), AVG([Average Active Time Per Day (s)])) AS [Average Active Time Per Day (s)], " +
+                "CONVERT(DECIMAL(10,2), AVG([Average Metres Traveled Per Day])) AS [Average Distance Traveled Per Day (m)] " +
+                "FROM #temp3 " +
+                "GROUP BY [Hand Number]";
+            SqlCommand command = new SqlCommand(query, connection);
+            sqlDataReader = command.ExecuteReader();
+            DataTable table = new DataTable();
+            table.Load(sqlDataReader);
+            dataGridView2.DataSource = table;
+            sqlDataReader.Close();
+            command.Dispose();
+            connection.Close();
+
         }
 
         private void AddTouchPointToDatabase(DateTime dataCollectionDate, string handNumber, string touchPoint, int newTouchPointIndex)
