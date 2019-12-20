@@ -59,6 +59,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HeroUsageDataDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HeroUsageDataDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="myFirstDatabaseDataSet.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -90,6 +95,17 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="HeroUsageDataDataSet.xsc">
+      <DependentUpon>HeroUsageDataDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="HeroUsageDataDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>HeroUsageDataDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="HeroUsageDataDataSet.xss">
+      <DependentUpon>HeroUsageDataDataSet.xsd</DependentUpon>
+    </None>
     <None Include="myFirstDatabaseDataSet.xsc">
       <DependentUpon>myFirstDatabaseDataSet.xsd</DependentUpon>
     </None>

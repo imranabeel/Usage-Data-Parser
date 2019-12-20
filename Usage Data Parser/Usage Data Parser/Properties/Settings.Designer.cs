@@ -45,5 +45,16 @@ namespace Usage_Data_Parser.Properties {
                 return ((string)(this["myFirstDatabaseConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=OPENBIONICS3\\SQLEXPRESS;Initial Catalog=HeroUsageData;Integrated Secu" +
+            "rity=True")]
+        public string HeroUsageDataConnectionString {
+            get {
+                return ((string)(this["HeroUsageDataConnectionString"]));
+            }
+        }
     }
 }
