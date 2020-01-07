@@ -466,6 +466,7 @@ namespace MicroJson
                 if (kvp.HasValue)
                 {
                     dict[kvp.Value.Key] = kvp.Value.Value;
+                    Console.WriteLine("Key: {0}, Value: {1}", kvp.Value.Key, kvp.Value.Value);
                 }
 
                 SkipWhitespace();

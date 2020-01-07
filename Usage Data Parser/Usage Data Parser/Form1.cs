@@ -7,7 +7,6 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
-using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -719,10 +718,16 @@ namespace Usage_Data_Parser
             string jsonInputData = File.ReadAllText(fullPath);
             try
             {
-                _jsonParsedData = new JsonSerializer().Deserialize<ParsedJSONFile>(jsonInputData);
+                //_jsonParsedData = new JsonSerializer().Deserialize<ParsedJSONFile>(jsonInputData);
+                JsonSerializer serialiser = new JsonSerializer();
+                JsonParser parser = new JsonParser();
+                parser.CollectLineInfo = true;
+                _jsonParsedData = serialiser.Deserialize<ParsedJSONFile>(jsonInputData, parser);
             }
             catch (ParserException ex)
             {
+                Console.WriteLine("parser error message: {0}", ex.Message);
+                Console.WriteLine("error at line {0} col {1}", ex.Line, ex.Column);
                 DodgyJsonParser dodgyJsonParser = new DodgyJsonParser();
                 _jsonParsedData = dodgyJsonParser.parseDodgyFile(jsonInputData);
             }
@@ -910,6 +915,7 @@ namespace Usage_Data_Parser
             command.Parameters.AddWithValue("@onTime", session.time != null && TimeSpan.TryParse(session.time.onTime, out TimeSpan onTime) ? (object)onTime : DBNull.Value);
             command.Parameters.AddWithValue("@BatteryMinV", session.battery != null && Single.TryParse(session.battery.min.battV, out float battMin) ? (object)battMin : DBNull.Value);
             command.Parameters.AddWithValue("@BatteryMaxV", session.battery != null && Single.TryParse(session.battery.max.battV, out float battMax) ? (object)battMax : DBNull.Value);
+            Console.WriteLine("Battery min: {0}, max: {1}", session.battery.min.battV, session.battery.max.battV);
             command.Parameters.AddWithValue("@TempMinC", session.temp != null && Single.TryParse(session.temp.minTemp.tempC, out float minTemp) ? (object)minTemp : DBNull.Value);
             command.Parameters.AddWithValue("@TempMaxC", session.temp != null && Single.TryParse(session.temp.maxTemp.tempC, out float maxTemp) ? (object)maxTemp : DBNull.Value);
             command.Parameters.AddWithValue("@MagMaxX", session.magFlux != null && Single.TryParse(session.magFlux.X.max, out float maxMagX) ? (object)maxMagX : DBNull.Value);
